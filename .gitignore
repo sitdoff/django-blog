@@ -1,0 +1,10 @@
+env/
+venv/
+.venv/
+myvenv/
+.env
+__pycache__/
+.flake8
+pyproject.toml
+media/
+todo.txt
