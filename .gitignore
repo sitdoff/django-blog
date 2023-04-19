@@ -8,3 +8,4 @@ __pycache__/
 pyproject.toml
 media/
 todo.txt
+ckeditor_req.txt

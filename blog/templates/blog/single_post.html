@@ -45,13 +45,13 @@
                         </div>
                         <!-- Article -->
                         <div class="blog-post-des">
-                            {{ post.article|linebreaks }}
                             {% if post.image %}
                                 <!-- Image -->
                                 <div class="blog-post-image">
                                     <img src="{{ post.image.url }}" class="img-responsive" alt="Blog Image 3">
                                 </div>
                             {% endif %}
+                            {{ post.article|safe }}
                         </div>
                         <!-- Author -->
                         <div class="blog-author">

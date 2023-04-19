@@ -1,3 +1,4 @@
+from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
 from django.urls import reverse
 
@@ -7,7 +8,7 @@ from django.urls import reverse
 class Post(models.Model):
     title = models.CharField(max_length=150, verbose_name="Заголовок")
     slug = models.SlugField(db_index=True)
-    article = models.TextField()
+    article = RichTextUploadingField()
     image = models.ImageField(upload_to="images/%Y/%m/%d/", blank=True)
     time_create = models.DateTimeField(auto_now_add=True)
     time_update = models.DateTimeField(auto_now=True)

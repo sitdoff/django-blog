@@ -44,7 +44,7 @@
                                 <!-- <span><a href="#"><i class="fa fa-comment-o"></i> 35 Comments</a></span> -->
                             </div>
                             <div class="blog-post-des">
-                                <p>{{ post.article|linebreaks|truncatewords:100 }}</p>
+                                <p>{{ post.article|safe|truncatewords:100 }}</p>
                                 <a href="{{ post.get_absolute_url }}" class="btn btn-default">Читать</a>
                             </div>
                         </div>
