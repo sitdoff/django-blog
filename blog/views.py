@@ -8,4 +8,4 @@ def home(request):
 
 
 def show_post(request, post_slug):
-    return HttpResponse(post_slug)
+    return render(request, "blog/single_post.html")
