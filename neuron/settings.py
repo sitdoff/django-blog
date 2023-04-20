@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "blog.apps.BlogConfig",
+    "users.apps.UsersConfig",
     "ckeditor",
 ]
 
@@ -90,6 +91,11 @@ DATABASES = {
         "PORT": "3306",
     }
 }
+
+# CustomUser settings
+
+AUTH_USER_MODEL = "users.CustomUser"
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

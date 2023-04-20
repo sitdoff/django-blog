@@ -7,7 +7,7 @@ from .models import Post
 class PostAdmin(admin.ModelAdmin):
     empty_value_display = "Пусто"
     readonly_fields = ("time_create", "time_update")
-    fields = ("title", "slug", "article", "image", "time_create", "time_update", "is_published")
+    fields = ("title", "slug", "article", "author", "image", "time_create", "time_update", "is_published")
     list_display = ("title", "slug", "article", "image", "time_create", "time_update", "is_published")
     prepopulated_fields = {"slug": ("title",)}
 
