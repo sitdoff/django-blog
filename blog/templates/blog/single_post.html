@@ -5,6 +5,7 @@
 {% block content %}
     {% if post.epigraph %}
         <!-- Home Section -->
+        {% if post.image %}
         <style type="text/css">
         .main-single-post {
             background: url({{ post.image.url }});
@@ -12,9 +13,8 @@
         
     }
         </style>
-        <section id="home"
-                 class="main-single-post parallax-section"
-                 style="background: {{ post.image.url }}">
+        {% endif %}
+        <section id="home" class="main-single-post parallax-section">
             <div class="overlay"></div>
             <div class="container">
                 <div class="row">

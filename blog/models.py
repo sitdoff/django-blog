@@ -8,6 +8,7 @@ from django.urls import reverse
 class Post(models.Model):
     title = models.CharField(max_length=150, verbose_name="Заголовок")
     slug = models.SlugField(db_index=True, verbose_name="URL SLUG", unique=True)
+    epigraph = models.CharField(max_length=256, blank=True, verbose_name="Эпиграф")
     article = RichTextUploadingField(verbose_name="Текст")
     author = models.ForeignKey("users.CustomUser", on_delete=models.PROTECT, verbose_name="Автор")
     image = models.ImageField(upload_to="images/%Y/%m/%d/", blank=True, verbose_name="Титульное изображение")
