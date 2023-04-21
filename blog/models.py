@@ -1,9 +1,9 @@
-from pprint import pprint
-
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
 from django.urls import reverse
 from slugify import slugify
+
+from .utils import slug_replacements
 
 # Create your models here.
 
@@ -27,7 +27,7 @@ class Post(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.title)
+            self.slug = slugify(self.title, word_boundary=True, replacements=slug_replacements)
         return super().save(*args, **kwargs)
 
     class Meta:
