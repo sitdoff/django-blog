@@ -1,8 +1,10 @@
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.views.generic import CreateView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
+from .forms import PostForm
 from .models import Post
 
 
@@ -28,3 +30,8 @@ class PostDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context["title"] = context["post"]
         return context
+
+
+class AddPost(CreateView):
+    form_class = PostForm
+    template_name = "blog/addpost.html"
