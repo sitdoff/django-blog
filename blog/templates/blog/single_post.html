@@ -38,8 +38,8 @@
                         <!-- Info -->
                         <div class="blog-post-format">
                             <span><a href="#">
-                                <img src="images/author-image1.jpg" class="img-responsive img-circle">
-                            Roman Ivanov</a></span>
+                                    <img src="{{post.author.photo.url}}" class="img-responsive img-circle">
+                                    {{post.author.first_name}}</a></span>
                             <span><i class="fa fa-date"></i>{{ post.time_create }}</span>
                             <!-- <span><a href="#"><i class="fa fa-comment-o"></i> 124 Comments</a></span> -->
                         </div>
@@ -57,20 +57,21 @@
                         <div class="blog-author">
                             <div class="media">
                                 <div class="media-object pull-left">
-                                    <img src="images/author-image1.jpg"
+                                        <img src="{{post.author.photo.url}}"
                                          class="img-circle img-responsive"
                                          alt="blog">
                                 </div>
                                 <div class="media-body">
                                     <h3 class="media-heading">
-                                        <a href="#">Roman Ivanov</a>
+                                            <a href="#">{{post.author.first_name}}</a>
                                     </h3>
                                     <p>
-                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+                                            {{post.author.bio}}
                                     </p>
                                 </div>
                             </div>
                         </div>
+                            <!-- Commenst -->
                         <div class="blog-comment">
                             <h3>Comments</h3>
                             <div class="media">
