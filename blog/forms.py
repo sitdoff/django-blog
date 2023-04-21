@@ -8,10 +8,17 @@ class PostForm(forms.ModelForm):
         model = Post
         fields = (
             "title",
-            "slug",
             "epigraph",
             "article",
             "image",
             "is_published",
             "author",
         )
+        widgets = {
+            "title": forms.TextInput(attrs={"class": "form-control"}),
+            "epigraph": forms.TextInput(attrs={"class": "form-control"}),
+            "article": forms.Textarea(attrs={"class": "form-control"}),
+            # "image",
+            # "is_published",
+            # "author",
+        }

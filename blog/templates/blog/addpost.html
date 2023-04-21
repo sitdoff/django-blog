@@ -6,9 +6,17 @@
                   method="post"
                   enctype="multipart/form-data">
                 {% csrf_token %}
-                {{ form.as_p }}
                 {{ form.media }}
-                <button type="submit">Отправить</button>
+                {{ form.as_p }}
+                <div class="blog-comment-form">
+                    <div class="col-md-3 col-sm-4">
+                        <input name="submit"
+                               type="submit"
+                               class="form-control"
+                               id="submit"
+                               value="Post">
+                    </div>
+                </div>
             </form>
         </div>
     </section>

@@ -15,6 +15,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from .ckeditor_config import CKEDITOR_CONFIGS
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -146,15 +148,3 @@ MEDIA_URL = "/media/"
 CKEDITOR_UPLOAD_PATH = "images/"
 CKEDITOR_IMAGE_BACKEND = "pillow"
 CKEDITOR_JQUERY_URL = "//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"
-
-CKEDITOR_CONFIGS = {
-    "default": {
-        "toolbar": "full",
-        "width": "auto",
-        "extraPlugins": ",".join(
-            [
-                "codesnippet",
-            ]
-        ),
-    },
-}
