@@ -7,7 +7,9 @@ from .utils import user_directory_path
 
 
 class CustomUser(AbstractUser):
-    photo = models.ImageField(upload_to=user_directory_path, blank=True, verbose_name="Фотография")
+    photo = models.ImageField(
+        upload_to=user_directory_path, blank=True, verbose_name="Фотография", default="userpic/default/default.jpg"
+    )
     bio = models.TextField(blank=True, verbose_name="О себе")
     is_author = models.BooleanField(default=False, verbose_name="Статус автора")
 
