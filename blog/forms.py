@@ -4,6 +4,14 @@ from .models import Post
 
 
 class PostForm(forms.ModelForm):
+    def __init__(self, author, *args, **kwargs):
+        self.author = author
+        super().__init__(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        self.instance.author = self.author
+        return super().save(*args, **kwargs)
+
     class Meta:
         model = Post
         fields = (
@@ -11,8 +19,6 @@ class PostForm(forms.ModelForm):
             "epigraph",
             "article",
             "image",
-            "is_published",
-            "author",
         )
         widgets = {
             "title": forms.TextInput(attrs={"class": "form-control"}),

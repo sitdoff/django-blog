@@ -35,3 +35,8 @@ class PostDetailView(DetailView):
 class AddPost(CreateView):
     form_class = PostForm
     template_name = "blog/addpost.html"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({"author": self.request.user if self.request.user.is_authenticated else None})
+        return kwargs
