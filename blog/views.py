@@ -40,3 +40,15 @@ class AddPost(CreateView):
         kwargs = super().get_form_kwargs()
         kwargs.update({"author": self.request.user if self.request.user.is_authenticated else None})
         return kwargs
+
+
+def about(request):
+    return HttpResponse("about")
+
+
+def gallery(request):
+    return HttpResponse("gallery")
+
+
+def contact(request):
+    return HttpResponse("contact")

@@ -1,4 +1,5 @@
 {% load static %}
+{% load blog_tags %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -33,38 +34,7 @@ http://www.tooplate.com/view/2085-neuron
                 <span class="sk-inner-circle"></span>
             </div>
         </div>
-        <!-- Navigation section  -->
-        <div class="navbar navbar-default navbar-static-top" role="navigation">
-            <div class="container">
-                <div class="navbar-header">
-                    <button class="navbar-toggle"
-                            data-toggle="collapse"
-                            data-target=".navbar-collapse">
-                        <span class="icon icon-bar"></span>
-                        <span class="icon icon-bar"></span>
-                        <span class="icon icon-bar"></span>
-                    </button>
-                    <a href="/" class="navbar-brand">Neuron</a>
-                </div>
-                <div class="collapse navbar-collapse">
-                    <ul class="nav navbar-nav navbar-right">
-                        <li class="active">
-                            <a href="index.html">Home</a>
-                        </li>
-                        <li>
-                            <a href="about.html">About</a>
-                        </li>
-                        <li>
-                            <a href="gallery.html">Gallery</a>
-                        </li>
-                        <li>
-                            <a href="contact.html">Contact</a>
-                        </li>
-                        <li><a href="{% url 'add_post' %}">Добавить пост</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+        {% navigation %}
         {% block content %}
         {% endblock content %}
         <!-- Footer Section -->
