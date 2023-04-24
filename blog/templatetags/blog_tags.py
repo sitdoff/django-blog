@@ -12,5 +12,5 @@ navigation_menu = [
 
 
 @register.inclusion_tag("blog/navigation_menu.html")
-def navigation():
-    return {"navigation_menu": navigation_menu}
+def navigation(user):
+    return {"navigation_menu": navigation_menu, "user": user}

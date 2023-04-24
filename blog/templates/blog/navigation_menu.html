@@ -18,6 +18,18 @@
                         <a href="{% url elem.url_name %}">{{ elem.title }}</a>
                     </li>
                 {% endfor %}
+                <li>
+                    <a href="">|</a>
+                </li>
+                {% if user.first_name %}
+                    <li>
+                        <a href="">{{ user.first_name }}</a>
+                    </li>
+                {% else %}
+                    <li>
+                        <a href="">{{ user.username }}</a>
+                    </li>
+                {% endif %}
                 <!-- <li class="active"> -->
                 <!--     <a href="url_name">title</a> -->
                 <!-- </li> -->
