@@ -1,5 +1,7 @@
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
@@ -9,6 +11,16 @@ from .models import Post
 
 
 # Create your views here.
+class IsAuthorRequiredMixin(PermissionRequiredMixin):
+    redirect_field_name = None
+    login_url = reverse_lazy("login")
+
+    def has_permission(self):
+        if self.request.user.is_anonymous or not self.request.user.is_author:
+            return False
+        return True
+
+
 class IndexView(ListView):
     model = Post
     template_name = "blog/index.html"
@@ -32,7 +44,7 @@ class PostDetailView(DetailView):
         return context
 
 
-class AddPost(CreateView):
+class AddPost(IsAuthorRequiredMixin, CreateView):
     form_class = PostForm
     template_name = "blog/addpost.html"
 
