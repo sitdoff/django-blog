@@ -1,0 +1,29 @@
+<li>
+    <a>|</a>
+</li>
+{% if user.is_authenticated %}
+    {% if user.is_author %}
+        <li>
+            <a href="{% url 'add_post' %}">Добавить пост</a>
+        </li>
+    {% endif %}
+    {% if user.first_name %}
+        <li>
+            <a href="">{{ user.first_name }}</a>
+        </li>
+    {% else %}
+        <li>
+            <a href="">{{ user.username }}</a>
+        </li>
+    {% endif %}
+    <li>
+        <a href="{% url 'logout' %}">Выйти</a>
+    </li>
+{% else %}
+    <li>
+        <a href="{% url 'register' %}">Регистрация</a>
+    </li>
+    <li>
+        <a href="{% url 'login' %}">Вход</a>
+    </li>
+{% endif %}
