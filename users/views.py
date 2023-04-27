@@ -4,29 +4,23 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 
+from blog.utils import TitleMixin
+
 from .forms import RegisterUserForm
 
 
 # Create your views here.
-class RegisterUser(CreateView):
+class RegisterUser(TitleMixin, CreateView):
+    title = "Регистрация"
     form_class = RegisterUserForm
     template_name = "users/register.html"
     success_url = reverse_lazy("home")
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["title"] = "Регистрация"
-        return context
 
-
-class LoginUser(LoginView):
+class LoginUser(TitleMixin, LoginView):
+    title = "Вход"
     template_name = "users/login.html"
     next_page = reverse_lazy("home")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["title"] = "Вход"
-        return context
 
 
 class LogoutUser(LogoutView):

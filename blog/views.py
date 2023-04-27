@@ -8,6 +8,7 @@ from django.views.generic.list import ListView
 
 from .forms import PostForm
 from .models import Post
+from .utils import TitleMixin
 
 
 # Create your views here.
@@ -21,15 +22,11 @@ class IsAuthorRequiredMixin(PermissionRequiredMixin):
         return True
 
 
-class IndexView(ListView):
+class IndexView(TitleMixin, ListView):
+    title = "Главная страница"
     model = Post
     template_name = "blog/index.html"
     context_object_name = "posts"
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["title"] = "Главная страница"
-        return context
 
 
 class PostDetailView(DetailView):
@@ -44,14 +41,10 @@ class PostDetailView(DetailView):
         return context
 
 
-class AddPost(IsAuthorRequiredMixin, CreateView):
+class AddPost(IsAuthorRequiredMixin, TitleMixin, CreateView):
+    title = "Добавить пост"
     form_class = PostForm
     template_name = "blog/addpost.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["title"] = "Добавить пост"
-        return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
