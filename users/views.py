@@ -13,10 +13,20 @@ class RegisterUser(CreateView):
     template_name = "users/register.html"
     success_url = reverse_lazy("home")
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Регистрация"
+        return context
+
 
 class LoginUser(LoginView):
     template_name = "users/login.html"
     next_page = reverse_lazy("home")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Вход"
+        return context
 
 
 class LogoutUser(LogoutView):
