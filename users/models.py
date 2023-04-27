@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.urls import reverse
 
 from .utils import user_directory_path
 
@@ -15,6 +16,9 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+
+    def get_absolute_url(self):
+        return reverse("author_posts", kwargs={"username": self.username})
 
     class Meta:
         verbose_name = "Пользователя"

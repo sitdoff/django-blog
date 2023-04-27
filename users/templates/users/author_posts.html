@@ -4,15 +4,26 @@
 {% endblock title %}
 {% block content %}
     <!-- Home Section -->
-    <section id="home" class="main-home parallax-section">
+    <style type="text/css">
+        .main-single-post {
+            background: url({{ author.photo.url }});
+            no-repeat;
+        
+    }
+    </style>
+    <section id="home" class="main-single-post parallax-section">
         <div class="overlay"></div>
-        <div id="particles-js"></div>
         <div class="container">
             <div class="row">
                 <div class="col-md-12 col-sm-12">
-                    <h1>Home</h1>
-                    <h4>Responsive Blog HTML CSS Website Template</h4>
-                    <a href="#blog" class="smoothScroll btn btn-default">Читать</a>
+                    <h1>
+                        {% if author.first_name %}
+                            {{ author.first_name }}
+                        {% else %}
+                            {{ author.username }}
+                        {% endif %}
+                    </h1>
+                    <h2>{{ author.bio }}</h2>
                 </div>
             </div>
         </div>
