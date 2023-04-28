@@ -45,6 +45,7 @@ class AuthorPosts(TitleMixin, ListView):
     model = Post
     template_name = "users/author_posts.html"
     context_object_name = "posts"
+    paginate_by = 5
 
     def setup(self, *args, **kwargs):
         super().setup(*args, **kwargs)

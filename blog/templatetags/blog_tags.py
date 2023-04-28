@@ -13,3 +13,8 @@ navigation_menu = [
 @register.inclusion_tag("blog/navigation_menu.html")
 def navigation(user):
     return {"navigation_menu": navigation_menu, "user": user}
+
+
+@register.inclusion_tag("blog/pagination.html")
+def pagination(paginator, page_obj):
+    return {"page_obj": page_obj, "paginator": paginator}
