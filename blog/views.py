@@ -26,6 +26,7 @@ class IndexView(TitleMixin, ListView):
     title = "Главная страница"
     model = Post
     template_name = "blog/index.html"
+    paginate_by = 5
     context_object_name = "posts"
 
 
