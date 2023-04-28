@@ -1,4 +1,5 @@
 {% extends "blog/base.html" %}
+{% load users_tags %}
 {% block title %}
     {{ title }}
 {% endblock title %}
@@ -36,14 +37,8 @@
                             <h2>{{ post.title }}</h2>
                         </div>
                         <!-- Info -->
-                        <div class="blog-post-format"><span><a href="{{ post.author.get_absolute_url }}">
-                                    <img src="{{ post.author.photo.url }}" class="img-responsive img-circle">
-                                    {% if post.author.first_name %}
-                                        {{ post.author.first_name }}
-                                    {% else %}
-                                        {{ post.author.username }}
-                                    {% endif %}
-                                </a></span>
+                        <div class="blog-post-format">
+                                {% author_info post.author %}
                             <span><i class="fa fa-date"></i>{{ post.time_create }}</span>
                             <!-- <span><a href="#"><i class="fa fa-comment-o"></i> 124 Comments</a></span> -->
                         </div>

@@ -1,0 +1,8 @@
+<span><a href="{{ author.get_absolute_url }}">
+    <img src="{{ author.photo.url }}" class="img-responsive img-circle">
+    {% if author.first_name %}
+        {{ author.first_name }}
+    {% else %}
+        {{ author.username }}
+    {% endif %}
+</a></span>
