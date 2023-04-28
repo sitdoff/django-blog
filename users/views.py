@@ -2,11 +2,12 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
+from django.views.generic import CreateView, UpdateView
 from django.views.generic.list import ListView
 
 from blog.models import Post
 from blog.utils import TitleMixin
+from blog.views import IsAuthorRequiredMixin
 
 from .forms import RegisterUserForm
 from .models import CustomUser
@@ -28,6 +29,16 @@ class LoginUser(TitleMixin, LoginView):
 
 class LogoutUser(LogoutView):
     ...
+
+
+class EditProfileUser(IsAuthorRequiredMixin, TitleMixin, UpdateView):
+    title = "Данные автора"
+    model = CustomUser
+    template_name = "users/profile_edit.html"
+    fields = ("photo", "first_name", "bio")
+
+    def get_object(self, queryset=None):
+        return self.request.user
 
 
 class AuthorPosts(TitleMixin, ListView):

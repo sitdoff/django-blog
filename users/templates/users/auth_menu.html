@@ -7,14 +7,31 @@
             <a href="{% url 'add_post' %}">Добавить пост</a>
         </li>
     {% endif %}
-    {% if user.first_name %}
+    {% if user.is_staff %}
         <li>
-            <a href="">{{ user.first_name }}</a>
+            <a href="">Неопубликованные посты</a>
         </li>
+    {% endif %}
+    {% if user.is_author %}
+        {% if user.first_name %}
+            <li>
+                <a href="{% url "profile_edit" %}">{{ user.first_name }}</a>
+            </li>
+        {% else %}
+            <li>
+                <a href="{% url "profile_edit" %}">{{ user.username }}</a>
+            </li>
+        {% endif %}
     {% else %}
-        <li>
-            <a href="">{{ user.username }}</a>
-        </li>
+        {% if user.first_name %}
+            <li>
+                <a>{{ user.first_name }}</a>
+            </li>
+        {% else %}
+            <li>
+                <a>{{ user.username }}</a>
+            </li>
+        {% endif %}
     {% endif %}
     <li>
         <a href="{% url 'logout' %}">Выйти</a>
