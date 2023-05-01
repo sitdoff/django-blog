@@ -22,12 +22,32 @@ class IsAuthorRequiredMixin(PermissionRequiredMixin):
         return True
 
 
+class IsStaffRequiredMixin(PermissionRequiredMixin):
+    redirect_field_name = None
+    login_url = reverse_lazy("login")
+
+    def has_permission(self):
+        if self.request.user.is_anonymous or not self.request.user.is_staff:
+            return False
+        return True
+
+
 class IndexView(TitleMixin, ListView):
     title = "Главная страница"
     model = Post
     template_name = "blog/index.html"
     paginate_by = 5
     context_object_name = "posts"
+    queryset = Post.objects.filter(is_published=True)
+
+
+class UnpublishedPostsView(IsStaffRequiredMixin, TitleMixin, ListView):
+    title = "Неопубликованные посты"
+    model = Post
+    template_name = "blog/index.html"
+    paginate_by = 5
+    context_object_name = "posts"
+    queryset = Post.objects.filter(is_published=False)
 
 
 class PostDetailView(DetailView):

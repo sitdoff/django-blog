@@ -25,6 +25,7 @@
             <div class="row">
                 <div class="col-md-offset-1 col-md-10 col-sm-12">
                     {% for post in posts %}
+                        {% if not post.is_published %}<h1 style="color: red">UNPUBLISHED</h1>{% endif %}
                         <div class="blog-post-thumb">
                             {% if post.image %}
                                 <div class="blog-post-image">

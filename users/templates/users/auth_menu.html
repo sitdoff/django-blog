@@ -9,7 +9,7 @@
     {% endif %}
     {% if user.is_staff %}
         <li>
-            <a href="">Неопубликованные посты</a>
+            <a href="{% url "unpublished_post" %}">Неопубликованные посты</a>
         </li>
     {% endif %}
     {% if user.is_author %}
