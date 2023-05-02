@@ -3,28 +3,17 @@ from django import forms
 from .models import Post
 
 
-class PostForm(forms.ModelForm):
-    def __init__(self, author, *args, **kwargs):
-        self.author = author
-        super().__init__(*args, **kwargs)
-
-    def save(self, *args, **kwargs):
-        self.instance.author = self.author
-        return super().save(*args, **kwargs)
-
+class AddPostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = (
-            "title",
-            "epigraph",
-            "article",
-            "image",
-        )
+        fields = ("title", "epigraph", "article", "image", "is_draft")
         widgets = {
             "title": forms.TextInput(attrs={"class": "form-control"}),
             "epigraph": forms.TextInput(attrs={"class": "form-control"}),
             "article": forms.Textarea(attrs={"class": "form-control"}),
-            # "image",
-            # "is_published",
-            # "author",
         }
+
+
+class EditStaffPostForm(AddPostForm):
+    class Meta(AddPostForm.Meta):
+        fields = ("title", "epigraph", "article", "image", "is_published")

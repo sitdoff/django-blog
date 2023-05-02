@@ -25,7 +25,6 @@
             <div class="row">
                 <div class="col-md-offset-1 col-md-10 col-sm-12">
                     {% for post in posts %}
-                        {% if not post.is_published %}<h1 style="color: red">UNPUBLISHED</h1>{% endif %}
                         <div class="blog-post-thumb">
                             {% if post.image %}
                                 <div class="blog-post-image">
@@ -41,7 +40,7 @@
                             </div>
                             <div class="blog-post-format">
                                 {% author_info post.author %}
-                                <span><i class="fa fa-date"></i>{{ post.time_create }}</span>
+                                <span><i class="fa fa-date"></i>{{ post.time_update }}</span>
                                 <!-- <span><a href="#"><i class="fa fa-comment-o"></i> 35 Comments</a></span> -->
                             </div>
                             <div class="blog-post-des">

@@ -2,11 +2,11 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
+from django.views.generic import CreateView, UpdateView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
-from .forms import PostForm
+from .forms import AddPostForm, EditStaffPostForm
 from .models import Post
 from .utils import TitleMixin
 
@@ -38,13 +38,13 @@ class IndexView(TitleMixin, ListView):
     template_name = "blog/index.html"
     paginate_by = 5
     context_object_name = "posts"
-    queryset = Post.objects.filter(is_published=True)
+    queryset = Post.objects.filter(is_published=True).order_by("-time_update")
 
 
 class UnpublishedPostsView(IsStaffRequiredMixin, TitleMixin, ListView):
     title = "Неопубликованные посты"
     model = Post
-    template_name = "blog/index.html"
+    template_name = "blog/unpublished_posts.html"
     paginate_by = 5
     context_object_name = "posts"
     queryset = Post.objects.filter(is_published=False)
@@ -64,13 +64,22 @@ class PostDetailView(DetailView):
 
 class AddPost(IsAuthorRequiredMixin, TitleMixin, CreateView):
     title = "Добавить пост"
-    form_class = PostForm
+    form_class = AddPostForm
     template_name = "blog/addpost.html"
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs.update({"author": self.request.user if self.request.user.is_authenticated else None})
-        return kwargs
+    def form_valid(self, form):
+        self.instanse = form.save(commit=False)
+        self.instanse.author = self.request.user
+        self.instanse.save()
+        return super().form_valid(form)
+
+
+class EditPost(IsStaffRequiredMixin, TitleMixin, UpdateView):
+    title = "Редактирование поста"
+    model = Post
+    form_class = EditStaffPostForm
+    template_name = "blog/editpost.html"
+    slug_url_kwarg = "post_slug"
 
 
 def about(request):

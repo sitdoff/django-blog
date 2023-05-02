@@ -1,0 +1,47 @@
+{% extends "blog/base.html" %}
+{% load blog_tags %}
+{% load users_tags %}
+{% block title %}
+    {{ title }}
+{% endblock title %}
+{% block content %}
+    <!-- Home Section -->
+    <!-- Blog Section -->
+    <section id="blog">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-offset-1 col-md-10 col-sm-12">
+                    {% for post in posts %}
+                        <div class="blog-post-thumb">
+                            {% if post.image %}
+                                <div class="blog-post-image">
+                                    <a href="{{ post.get_absolute_url }}">
+                                        <img src="{{ post.image.url }}" class="img-responsive" alt="Blog Image">
+                                    </a>
+                                </div>
+                            {% endif %}
+                            <div class="blog-post-title">
+                                <h3>
+                                    {% if not post.is_published %}<span style="color: red">[UNPUBLISHED]</span>{% endif %}
+                                    <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+                                </h3>
+                            </div>
+                            <div class="blog-post-format">
+                                {% author_info post.author %}
+                                <span><i class="fa fa-date"></i>{{ post.time_create }}</span>
+                                <!-- <span><a href="#"><i class="fa fa-comment-o"></i> 35 Comments</a></span> -->
+                            </div>
+                            <div class="blog-post-des">
+                                <p>{{ post.article|safe|truncatewords:100 }}</p>
+                                <a href="{{ post.get_absolute_url }}" class="btn btn-default">Читать</a>
+                                <a href="{% url 'edit_post' post.slug %}" class="btn btn-default">Edit</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <!-- Блок пагинации -->
+                    {% pagination paginator page_obj %}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock content %}
