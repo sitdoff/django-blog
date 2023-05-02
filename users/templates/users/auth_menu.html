@@ -6,10 +6,13 @@
         <li>
             <a href="{% url 'add_post' %}">Добавить пост</a>
         </li>
+        <li>
+            <a href="{% url 'drafts' %}">Черновики</a>
+        </li>
     {% endif %}
     {% if user.is_staff %}
         <li>
-            <a href="{% url "unpublished_post" %}">Неопубликованные посты</a>
+            <a href="{% url "unpublished_posts" %}">Неопубликованные посты</a>
         </li>
     {% endif %}
     {% if user.is_author %}

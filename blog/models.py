@@ -17,7 +17,8 @@ class Post(models.Model):
     image = models.ImageField(upload_to="images/%Y/%m/%d/", blank=True, verbose_name="Титульное изображение")
     time_create = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")
     time_update = models.DateTimeField(auto_now=True, verbose_name="Время редактирования")
-    is_published = models.BooleanField(default=False, verbose_name="Опубликовано")
+    is_draft = models.BooleanField(default=True, verbose_name="Черновик")
+    is_published = models.BooleanField(default=False, verbose_name="Опубликовать")
 
     def __str__(self):
         return self.title

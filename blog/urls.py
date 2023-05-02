@@ -8,7 +8,11 @@ urlpatterns = [
     path("gallery", views.gallery, name="gallery"),
     path("contact", views.contact, name="contact"),
     path("add", views.AddPost.as_view(), name="add_post"),
-    path("post/unpublished", views.UnpublishedPostsView.as_view(), name="unpublished_post"),
     path("post/<slug:post_slug>", views.PostDetailView.as_view(), name="post"),
-    path("post/edit/<slug:post_slug>", views.EditPost.as_view(), name="edit_post"),
+    path("drafts", views.DraftPostsView.as_view(), name="drafts"),
+    path("post/draft/<slug:post_slug>", views.DraftPostDetailView.as_view(), name="draft"),
+    path("drafts/edit/<slug:post_slug>", views.EditDraftPost.as_view(), name="edit_draft"),
+    path("unpublished", views.UnpublishedPostsView.as_view(), name="unpublished_posts"),
+    path("unpublished/<slug:post_slug>", views.UnpublishedPostDetailView.as_view(), name="unpublished_post"),
+    path("unpublish/edit/<slug:post_slug>", views.EditUnpublishedPost.as_view(), name="edit_post"),
 ]
