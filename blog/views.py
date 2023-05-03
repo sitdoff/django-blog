@@ -36,8 +36,8 @@ class IsAuthorDraftRequiredMixin(PermissionRequiredMixin):
     def has_permission(self):
         if self.request.user.is_superuser:
             return True
-        self.post = get_object_or_404(self.model, slug=self.kwargs["post_slug"])
-        if self.post.is_draft and self.post.author == self.request.user:
+        self.post_instanse = get_object_or_404(self.model, slug=self.kwargs["post_slug"])
+        if self.post_instanse.author.id == self.request.user.id:
             return True
         return False
 
