@@ -8,6 +8,7 @@ from .utils import user_directory_path
 
 
 class CustomUser(AbstractUser):
+    email = models.EmailField(unique=True, blank=False)
     photo = models.ImageField(
         upload_to=user_directory_path, blank=True, verbose_name="Фотография", default="userpic/default/default.jpg"
     )
