@@ -19,6 +19,7 @@ class Post(models.Model):
     time_update = models.DateTimeField(auto_now=True, verbose_name="Время редактирования")
     is_draft = models.BooleanField(default=True, verbose_name="Черновик")
     is_published = models.BooleanField(default=False, verbose_name="Опубликовать")
+    is_pinned = models.BooleanField(default=False, verbose_name="Закрепить")
 
     def __str__(self):
         return self.title

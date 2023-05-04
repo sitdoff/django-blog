@@ -18,18 +18,9 @@ class PostAdmin(admin.ModelAdmin):
         "time_update",
         "is_draft",
         "is_published",
+        "is_pinned",
     )
-    list_display = (
-        "title",
-        "slug",
-        "author",
-        "article",
-        "image",
-        "time_create",
-        "time_update",
-        "is_draft",
-        "is_published",
-    )
+    list_display = ("title", "author", "image", "time_create", "time_update", "is_draft", "is_published", "is_pinned")
     prepopulated_fields = {"slug": ("title",)}
 
 

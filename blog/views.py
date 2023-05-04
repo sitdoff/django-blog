@@ -48,7 +48,16 @@ class IndexView(TitleMixin, ListView):
     template_name = "blog/index.html"
     paginate_by = 5
     context_object_name = "posts"
-    queryset = Post.objects.filter(is_draft=False).filter(is_published=True).order_by("-time_update")
+    queryset = (
+        Post.objects.filter(is_draft=False).filter(is_published=True).filter(is_pinned=False).order_by("-time_update")
+    )
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        pinned_posts = self.model.objects.filter(is_pinned=True)
+        if pinned_posts:
+            context["pinned_posts"] = pinned_posts
+        return context
 
 
 class UnpublishedPostsView(IsStaffRequiredMixin, TitleMixin, ListView):
