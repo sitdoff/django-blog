@@ -1,19 +1,19 @@
 from django.contrib.auth.views import LoginView, LogoutView
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
 from django.views.generic.list import ListView
 
 from blog.models import Post
 from blog.utils import TitleMixin
-from blog.views import IsAuthorRequiredMixin
 
 from .forms import RegisterUserForm
+from .mixins import IsAuthorRequiredMixin
 from .models import CustomUser
 
-
 # Create your views here.
+
+
 class RegisterUser(TitleMixin, CreateView):
     title = "Регистрация"
     form_class = RegisterUserForm
@@ -57,4 +57,4 @@ class AuthorPosts(TitleMixin, ListView):
         return context
 
     def get_queryset(self):
-        return Post.objects.filter(author__username=self.kwargs["username"])
+        return Post.objects.filter(author__username=self.kwargs["username"]).filter(is_published=True)

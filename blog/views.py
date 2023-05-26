@@ -1,45 +1,20 @@
-from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
+from users.mixins import (
+    IsAuthorDraftRequiredMixin,
+    IsAuthorRequiredMixin,
+    IsStaffRequiredMixin,
+)
+
 from .forms import AddPostForm, EditStaffPostForm
 from .models import Post
 from .utils import TitleMixin
 
-
 # Create your views here.
-class IsAuthorRequiredMixin(PermissionRequiredMixin):
-    redirect_field_name = None
-    login_url = reverse_lazy("login")
-
-    def has_permission(self):
-        if self.request.user.is_anonymous or not self.request.user.is_author:
-            return False
-        return True
-
-
-class IsStaffRequiredMixin(PermissionRequiredMixin):
-    redirect_field_name = None
-    login_url = reverse_lazy("login")
-
-    def has_permission(self):
-        if self.request.user.is_anonymous or not self.request.user.is_staff:
-            return False
-        return True
-
-
-class IsAuthorDraftRequiredMixin(PermissionRequiredMixin):
-    def has_permission(self):
-        if self.request.user.is_superuser:
-            return True
-        self.post_instanse = get_object_or_404(self.model, slug=self.kwargs["post_slug"])
-        if self.post_instanse.author.id == self.request.user.id:
-            return True
-        return False
 
 
 class IndexView(TitleMixin, ListView):
