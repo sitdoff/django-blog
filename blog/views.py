@@ -11,8 +11,8 @@ from users.mixins import (
 )
 
 from .forms import AddPostForm, EditStaffPostForm
+from .mixins import TitleMixin
 from .models import Post
-from .utils import TitleMixin
 
 # Create your views here.
 

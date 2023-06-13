@@ -4,8 +4,8 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
 from django.views.generic.list import ListView
 
+from blog.mixins import TitleMixin
 from blog.models import Post
-from blog.utils import TitleMixin
 
 from .forms import RegisterUserForm
 from .mixins import IsAuthorRequiredMixin

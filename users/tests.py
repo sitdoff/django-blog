@@ -45,7 +45,7 @@ class TestPermissions(CreateTestUsersAndPostsMixin, TestCase):
             self.assertEqual(
                 response.status_code, 302, f"\n\nUrl: '{url}'.\nUser: {user}.\nStatus code: {response.status_code}"
             )
-            self.assertRedirects(response, "/user/login")
+            self.assertRedirects(response, f"/user/login?next={url}")
         elif user.username in access:
             self.assertEqual(
                 response.status_code, 200, f"\n\nUrl: '{url}'.\nUser: {user}.\nStatus code: {response.status_code}"

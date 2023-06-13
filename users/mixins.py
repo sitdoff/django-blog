@@ -4,7 +4,7 @@ from django.urls import reverse_lazy
 
 
 class IsAuthorRequiredMixin(PermissionRequiredMixin):
-    redirect_field_name = None
+    redirect_field_name = "next"
     login_url = reverse_lazy("login")
 
     def has_permission(self):
@@ -16,7 +16,7 @@ class IsAuthorRequiredMixin(PermissionRequiredMixin):
 
 
 class IsStaffRequiredMixin(PermissionRequiredMixin):
-    redirect_field_name = None
+    redirect_field_name = "next"
     login_url = reverse_lazy("login")
 
     def has_permission(self):
@@ -28,7 +28,7 @@ class IsStaffRequiredMixin(PermissionRequiredMixin):
 
 
 class IsAuthorDraftRequiredMixin(PermissionRequiredMixin):
-    redirect_field_name = None
+    redirect_field_name = "next"
     login_url = reverse_lazy("login")
 
     def has_permission(self):
