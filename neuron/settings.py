@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "blog.apps.BlogConfig",
     "users.apps.UsersConfig",
+    "comments.apps.CommentsConfig",
     "ckeditor",
     "debug_toolbar",
 ]

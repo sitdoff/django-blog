@@ -4,6 +4,7 @@ from django.views.generic import CreateView, UpdateView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
+from comments.models import Comment
 from users.mixins import (
     IsAuthorDraftRequiredMixin,
     IsAuthorRequiredMixin,
@@ -65,7 +66,7 @@ class PostDetailView(DetailView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["title"] = context["post"]
+        context["comments"] = context["post"].comment_set.filter(is_published=True)
         return context
 
 
