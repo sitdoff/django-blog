@@ -1,9 +1,11 @@
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
+from comments.forms import CommentForm
 from comments.models import Comment
 from users.mixins import (
     IsAuthorDraftRequiredMixin,
@@ -25,12 +27,16 @@ class IndexView(TitleMixin, ListView):
     paginate_by = 5
     context_object_name = "posts"
     queryset = (
-        Post.objects.filter(is_draft=False).filter(is_published=True).filter(is_pinned=False).order_by("-time_update")
+        Post.objects.filter(is_draft=False)
+        .filter(is_published=True)
+        .filter(is_pinned=False)
+        .order_by("-time_update")
+        .select_related()
     )
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        pinned_posts = self.model.objects.filter(is_pinned=True)
+        pinned_posts = self.model.objects.filter(is_pinned=True).select_related()
         if pinned_posts:
             context["pinned_posts"] = pinned_posts
         return context
@@ -42,7 +48,7 @@ class UnpublishedPostsView(IsStaffRequiredMixin, TitleMixin, ListView):
     template_name = "blog/unpublished_posts.html"
     paginate_by = 5
     context_object_name = "posts"
-    queryset = Post.objects.filter(is_draft=False).filter(is_published=False).order_by("-time_update")
+    queryset = Post.objects.filter(is_draft=False).filter(is_published=False).order_by("-time_update").select_related()
 
 
 class DraftPostsView(IsAuthorRequiredMixin, TitleMixin, ListView):
@@ -53,7 +59,12 @@ class DraftPostsView(IsAuthorRequiredMixin, TitleMixin, ListView):
     context_object_name = "posts"
 
     def get_queryset(self):
-        queryset = Post.objects.filter(is_draft=True).filter(author=self.request.user).order_by("-time_create")
+        queryset = (
+            Post.objects.filter(is_draft=True)
+            .filter(author=self.request.user)
+            .order_by("-time_create")
+            .select_related()
+        )
         return queryset
 
 
@@ -62,12 +73,31 @@ class PostDetailView(DetailView):
     template_name = "blog/single_post.html"
     context_object_name = "post"
     slug_url_kwarg = "post_slug"
-    queryset = model.objects.filter(is_draft=False).filter(is_published=True)
+    queryset = model.objects.filter(is_draft=False).filter(is_published=True).select_related()
+    comment_form = CommentForm
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["comments"] = context["post"].comment_set.filter(is_published=True)
+        if self.request.method == "GET":
+            context["form"] = self.comment_form()
         return context
+
+    def post(self, request, *args, **kwargs):
+        post = get_object_or_404(self.model, slug=kwargs["post_slug"])
+        author = request.user
+        content = request.POST["content"]
+        form = CommentForm({"post": post, "author": author, "content": content})
+        if form.is_valid():
+            form.save()
+            self.object = self.get_object()
+            context = super().get_context_data(**kwargs)
+            context["form"] = self.comment_form()
+            return self.render_to_response(context=context)
+        else:
+            self.object = self.get_object()
+            context = super().get_context_data(**kwargs)
+            context["form"] = form
+            return self.render_to_response(context=context)
 
 
 class UnpublishedPostDetailView(IsStaffRequiredMixin, PostDetailView):

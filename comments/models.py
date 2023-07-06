@@ -11,7 +11,7 @@ class Comment(models.Model):
     is_published = models.BooleanField(default=True, verbose_name="Опубликовать?")
 
     def __str__(self):
-        return f"{self.post.title} - {self.author.username}"
+        return f"{self.post.title} - {self.author.username} - {self.content[:20]}"
 
     class Meta:
         verbose_name = "Комментарий"

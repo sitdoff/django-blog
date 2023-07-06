@@ -7,13 +7,13 @@
     {% if post.epigraph %}
         <!-- Home Section -->
         {% if post.image %}
-        <style type="text/css">
+            <style type="text/css">
         .main-single-post {
             background: url({{ post.image.url }});
             no-repeat;
         
     }
-        </style>
+            </style>
         {% endif %}
         <section id="home" class="main-single-post parallax-section">
             <div class="overlay"></div>
@@ -35,15 +35,17 @@
                         <!-- Title -->
                         <div class="blog-post-title">
                             <h2>
-                                    {% if post.is_draft %}
-                                        <span style="color: red">[Черновик]</span>
-                                    {% elif not post.is_published %}
-                                        <span style="color: red">[UNPUBLISHED]</span>
-                                    {% endif %}{{ post.title }}</h2>
+                                {% if post.is_draft %}
+                                    <span style="color: red">[Черновик]</span>
+                                {% elif not post.is_published %}
+                                    <span style="color: red">[UNPUBLISHED]</span>
+                                {% endif %}
+                                {{ post.title }}
+                            </h2>
                         </div>
                         <!-- Info -->
                         <div class="blog-post-format">
-                                {% author_info post.author %}
+                            {% author_info post.author %}
                             <span><i class="fa fa-date"></i>{{ post.time_create }}</span>
                             <!-- <span><a href="#"><i class="fa fa-comment-o"></i> 124 Comments</a></span> -->
                         </div>
@@ -61,60 +63,44 @@
                         <div class="blog-author">
                             <div class="media">
                                 <div class="media-object pull-left">
-                                        <img src="{{post.author.photo.url}}"
+                                    <img src="{{ post.author.photo.url }}"
                                          class="img-circle img-responsive"
                                          alt="blog">
                                 </div>
                                 <div class="media-body">
                                     <h3 class="media-heading">
-                                            <a href="#">{{post.author.first_name}}</a>
+                                        <a href="#">{{ post.author.first_name }}</a>
                                     </h3>
-                                    <p>
-                                            {{post.author.bio}}
-                                    </p>
+                                    <p>{{ post.author.bio }}</p>
                                 </div>
                             </div>
                         </div>
-                            <!-- Commenst -->
-                        <div class="blog-comment">
-                            <h3>Comments</h3>
-                            {% for comment in comments %}
-                            <div class="media">
-                                <div class="media-object pull-left">
-                                    <img src="{{ comment.author.photo.url }}"
-                                         class="img-responsive img-circle"
-                                         alt="Blog Image 11">
-                                </div>
-                                <div class="media-body">
-                                    <h3 class="media-heading">{{ comment.author.first_name|default:comment.author.username }}</h3>
-                                    <span>{{ comment.time_create }}</span>
-                                    <p>
-                                        {{ comment.content }}
-                                    </p>
-                                </div>
+                        <!-- Commenst -->
+                            <div class="blog-comment">
+                                <h3>Комментарии</h3>
+                                {% for comment in post.comment_set.all %}
+                                    {% if comment.is_published %}
+                                        <div class="media">
+                                            <div class="media-object pull-left">
+                                                <img src="{{ comment.author.photo.url }}"
+                                                     class="img-responsive img-circle"
+                                                     alt="Blog Image 11">
+                                            </div>
+                                            <div class="media-body">
+                                                <h3 class="media-heading">{{ comment.author.first_name|default:comment.author.username }}</h3>
+                                                <span>{{ comment.time_create }}</span>
+                                                <p>{{ comment.content }}</p>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
                             </div>
-                            {% endfor %}
-                       </div>
+                        {% if user.is_authenticated %}
                         <div class="blog-comment-form">
-                            <h3>Leave a Comment</h3>
-                            <form action="#" method="post">
-                                <input type="text"
-                                       class="form-control"
-                                       placeholder="Name"
-                                       name="name"
-                                       required>
-                                <input type="email"
-                                       class="form-control"
-                                       placeholder="Email"
-                                       name="email"
-                                       required>
-                                <textarea name="message"
-                                          rows="5"
-                                          class="form-control"
-                                          id="message"
-                                          placeholder="Message"
-                                          message="message"
-                                          required="required"></textarea>
+                            <h3>Оставьте комментарий</h3>
+                            <form method="post">
+                                {% csrf_token %}
+                                {{ form.as_p }}
                                 <div class="col-md-3 col-sm-4">
                                     <input name="submit"
                                            type="submit"
@@ -124,6 +110,7 @@
                                 </div>
                             </form>
                         </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
