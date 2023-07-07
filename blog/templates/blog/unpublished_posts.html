@@ -41,11 +41,10 @@
                             </div>
                             <div class="blog-post-des">
                                 <p>{{ post.article|safe|truncatewords:100 }}</p>
-                                {% if user.is_staff %}
+                                {% if user.is_staff and not post.is_draft %}
                                     <a href="{% url 'unpublished_post' post.slug %}" class="btn btn-default">Читать</a>
                                     <a href="{% url 'edit_post' post.slug %}" class="btn btn-default">Edit</a>
-                                {% endif %}
-                                {% if user.is_author %}
+                                {% elif user.is_author and post.is_draft %}
                                     <a href="{% url 'draft' post.slug %}" class="btn btn-default">Читать</a>
                                     <a href="{% url 'edit_draft' post.slug %}" class="btn btn-default">Edit</a>
                                 {% endif %}
