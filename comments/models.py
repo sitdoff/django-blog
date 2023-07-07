@@ -4,7 +4,7 @@ from django.db import models
 
 
 class Comment(models.Model):
-    content = models.TextField(max_length=255, verbose_name="Текст комментария")
+    content = models.TextField(verbose_name="Текст комментария")
     post = models.ForeignKey("blog.Post", on_delete=models.CASCADE, verbose_name="Пост")
     author = models.ForeignKey("users.CustomUser", on_delete=models.CASCADE, verbose_name="Автор")
     time_create = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")

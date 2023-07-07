@@ -6,6 +6,7 @@ from .models import Comment
 # Register your models here.
 class CommentAdmin(admin.ModelAdmin):
     readonly_fields = ("time_create",)
+    list_display = ("content", "author", "post")
 
 
 admin.site.register(Comment, CommentAdmin)
