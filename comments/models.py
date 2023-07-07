@@ -13,6 +13,10 @@ class Comment(models.Model):
     def __str__(self):
         return f"{self.post.title} - {self.author.username} - {self.content[:20]}"
 
+    def cut_content(self):
+        cut = self.content[:50]
+        return cut + ("..." if len(cut) == 50 else "")
+
     class Meta:
         verbose_name = "Комментарий"
         verbose_name_plural = "Комментарии"
