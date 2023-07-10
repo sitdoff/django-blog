@@ -5,7 +5,7 @@ from django.urls import reverse_lazy
 
 class IsAuthorRequiredMixin(PermissionRequiredMixin):
     redirect_field_name = "next"
-    login_url = reverse_lazy("login")
+    login_url = reverse_lazy("users:login")
 
     def has_permission(self):
         if self.request.user.is_superuser:
@@ -17,7 +17,7 @@ class IsAuthorRequiredMixin(PermissionRequiredMixin):
 
 class IsStaffRequiredMixin(PermissionRequiredMixin):
     redirect_field_name = "next"
-    login_url = reverse_lazy("login")
+    login_url = reverse_lazy("users:login")
 
     def has_permission(self):
         if self.request.user.is_superuser:
@@ -29,7 +29,7 @@ class IsStaffRequiredMixin(PermissionRequiredMixin):
 
 class IsAuthorDraftRequiredMixin(PermissionRequiredMixin):
     redirect_field_name = "next"
-    login_url = reverse_lazy("login")
+    login_url = reverse_lazy("users:login")
 
     def has_permission(self):
         if self.request.user.is_superuser:

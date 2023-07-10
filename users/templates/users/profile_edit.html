@@ -6,7 +6,7 @@
     <section id="blog">
         <div class="container">
             <div class="blog-comment-form">
-                <form action="{% url 'profile_edit' %}"
+                <form action="{% url 'users:profile_edit' %}"
                       method="post"
                       enctype="multipart/form-data">
                     {% csrf_token %}

@@ -14,12 +14,13 @@ class CustomUser(AbstractUser):
     )
     bio = models.TextField(blank=True, verbose_name="О себе")
     is_author = models.BooleanField(default=False, verbose_name="Статус автора")
+    is_active = models.BooleanField(default=False, verbose_name="Активен?")
 
     def __str__(self):
         return self.username
 
     def get_absolute_url(self):
-        return reverse("author_posts", kwargs={"username": self.username})
+        return reverse("users:author_posts", kwargs={"username": self.username})
 
     class Meta:
         verbose_name = "Пользователя"

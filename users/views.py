@@ -1,5 +1,7 @@
 from django.contrib.auth.views import LoginView, LogoutView
-from django.shortcuts import get_object_or_404
+from django.core.signing import BadSignature
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
 from django.views.generic.list import ListView
@@ -10,6 +12,7 @@ from blog.models import Post
 from .forms import RegisterUserForm
 from .mixins import IsAuthorRequiredMixin
 from .models import CustomUser
+from .utils import signer
 
 # Create your views here.
 
@@ -58,3 +61,19 @@ class AuthorPosts(TitleMixin, ListView):
 
     def get_queryset(self):
         return Post.objects.filter(author__username=self.kwargs["username"]).filter(is_published=True)
+
+
+def user_activate(request: HttpRequest, sign: str):
+    try:
+        username = signer.unsign(sign)
+    except BadSignature:
+        return render(request, "users/bad_signature.html")
+
+    user: CustomUser = get_object_or_404(CustomUser, username=username)
+    if user.is_active:
+        template = "users/user_is_active.html"
+    else:
+        template = "users/activation_done.html"
+        user.is_active = True
+        user.save()
+    return render(request, template)

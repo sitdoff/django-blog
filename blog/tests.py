@@ -9,11 +9,17 @@ from users.models import CustomUser
 
 class CreateTestUsersAndPostsMixin:
     users = [
-        {"username": "user", "email": "user@test.com"},
-        {"username": "author", "email": "author@test.com", "is_author": True},
-        {"username": "staff", "email": "staff@mail.com", "is_staff": True},
-        {"username": "authorstaff", "email": "authorstaff@test.com", "is_author": True, "is_staff": True},
-        {"username": "admin", "email": "admin@test.com", "is_superuser": True},
+        {"username": "user", "email": "user@test.com", "is_active": True},
+        {"username": "author", "email": "author@test.com", "is_author": True, "is_active": True},
+        {"username": "staff", "email": "staff@mail.com", "is_staff": True, "is_active": True},
+        {
+            "username": "authorstaff",
+            "email": "authorstaff@test.com",
+            "is_author": True,
+            "is_staff": True,
+            "is_active": True,
+        },
+        {"username": "admin", "email": "admin@test.com", "is_superuser": True, "is_active": True},
     ]
     posts = {
         "draft": {"title": "draft_post", "is_draft": True, "is_published": False},
@@ -43,9 +49,9 @@ class TestBlog(CreateTestUsersAndPostsMixin, TestCase):
         "about": {"url": "/about", "kwargs": {}},
         "gallery": {"url": "/gallery", "kwargs": {}},
         "contact": {"url": "/contact", "kwargs": {}},
-        "register": {"url": "/user/register", "kwargs": {}},
-        "login": {"url": "/user/login", "kwargs": {}},
-        "author_posts": {"url": "/user/author/author", "kwargs": {"username": "author"}},
+        "users:register": {"url": "/user/register", "kwargs": {}},
+        "users:login": {"url": "/user/login", "kwargs": {}},
+        "users:author_posts": {"url": "/user/author/author", "kwargs": {"username": "author"}},
         "post": {"url": "/post/published-post", "kwargs": {"post_slug": "published-post"}},
     }
 

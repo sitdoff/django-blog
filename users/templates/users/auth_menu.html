@@ -7,11 +7,11 @@
             {% if user.is_author %}
                 {% if user.first_name %}
                     <li>
-                        <a href="{% url "profile_edit" %}">{{ user.first_name }}</a>
+                        <a href="{% url "users:profile_edit" %}">{{ user.first_name }}</a>
                     </li>
                 {% else %}
                     <li>
-                        <a href="{% url "profile_edit" %}">{{ user.username }}</a>
+                        <a href="{% url "users:profile_edit" %}">{{ user.username }}</a>
                     </li>
                 {% endif %}
             {% else %}
@@ -41,15 +41,15 @@
                 </li>
             {% endif %}
             <li>
-                <a href="{% url 'logout' %}">Выйти</a>
+                <a href="{% url 'users:logout' %}">Выйти</a>
             </li>
         </div>
     </div>
 {% else %}
     <li>
-        <a href="{% url 'register' %}">Регистрация</a>
+        <a href="{% url 'users:register' %}">Регистрация</a>
     </li>
     <li>
-        <a href="{% url 'login' %}">Вход</a>
+        <a href="{% url 'users:login' %}">Вход</a>
     </li>
 {% endif %}

@@ -22,7 +22,7 @@ class TestPermissions(CreateTestUsersAndPostsMixin, TestCase):
         "edit_draft": {"access": ("author", "admin"), "kwargs": {"post_slug": "draft-post"}},
         "unpublished_post": {"access": ("staff", "authorstaff", "admin"), "kwargs": {"post_slug": "unpublished-post"}},
         "edit_post": {"access": ("staff", "authorstaff", "admin"), "kwargs": {"post_slug": "unpublished-post"}},
-        "profile_edit": {"access": ("author", "authorstaff", "admin"), "kwargs": {}},
+        "users:profile_edit": {"access": ("author", "authorstaff", "admin"), "kwargs": {}},
     }
 
     def test_permissions(self):
@@ -32,7 +32,7 @@ class TestPermissions(CreateTestUsersAndPostsMixin, TestCase):
             url = reverse(page, kwargs=self.pages[page]["kwargs"])
             for user in self.test_users:
                 self.page_test(user=user, url=url, access=self.pages[page]["access"])
-            print(f'Permissions page "{url}" OK')
+            print(f'\nPermissions page "{url}" OK', end="")
 
     def page_test(self, user=None, url=None, access=None):
         """Request method"""
