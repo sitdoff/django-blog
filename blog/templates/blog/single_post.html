@@ -76,40 +76,40 @@
                             </div>
                         </div>
                         <!-- Commenst -->
-                            <div class="blog-comment">
-                                <h3>Комментарии</h3>
-                                {% for comment in post.comment_set.all %}
-                                    {% if comment.is_published %}
-                                        <div class="media">
-                                            <div class="media-object pull-left">
-                                                <img src="{{ comment.author.photo.url }}"
-                                                     class="img-responsive img-circle"
-                                                     alt="Blog Image 11">
-                                            </div>
-                                            <div class="media-body">
-                                                <h3 class="media-heading">{{ comment.author.first_name|default:comment.author.username }}</h3>
-                                                <span>{{ comment.time_create }}</span>
-                                                <p>{{ comment.content }}</p>
-                                            </div>
+                        <div class="blog-comment">
+                            <h3>Комментарии</h3>
+                            {% for comment in post.get_comments %}
+                                {% if comment.is_published %}
+                                    <div class="media">
+                                        <div class="media-object pull-left">
+                                            <img src="{{ comment.author.photo.url }}"
+                                                 class="img-responsive img-circle"
+                                                 alt="Blog Image 11">
                                         </div>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                        {% if user.is_authenticated %}
-                        <div class="blog-comment-form">
-                            <h3>Оставьте комментарий</h3>
-                            <form method="post">
-                                {% csrf_token %}
-                                {{ form.as_p }}
-                                <div class="col-md-3 col-sm-4">
-                                    <input name="submit"
-                                           type="submit"
-                                           class="form-control"
-                                           id="submit"
-                                           value="Post Your Comment">
-                                </div>
-                            </form>
+                                        <div class="media-body">
+                                            <h3 class="media-heading">{{ comment.author.first_name|default:comment.author.username }}</h3>
+                                            <span>{{ comment.time_create }}</span>
+                                            <p>{{ comment.content }}</p>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
                         </div>
+                        {% if user.is_authenticated %}
+                            <div class="blog-comment-form">
+                                <h3>Оставьте комментарий</h3>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    {{ form.as_p }}
+                                    <div class="col-md-3 col-sm-4">
+                                        <input name="submit"
+                                               type="submit"
+                                               class="form-control"
+                                               id="submit"
+                                               value="Post Your Comment">
+                                    </div>
+                                </form>
+                            </div>
                         {% endif %}
                     </div>
                 </div>

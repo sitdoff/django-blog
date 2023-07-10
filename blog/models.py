@@ -3,6 +3,8 @@ from django.db import models
 from django.urls import reverse
 from slugify import slugify
 
+from comments.models import Comment
+
 from .utils import slug_replacements
 
 # Create your models here.
@@ -26,6 +28,9 @@ class Post(models.Model):
 
     def get_absolute_url(self):
         return reverse("post", kwargs={"post_slug": self.slug})
+
+    def get_comments(self):
+        return Comment.objects.filter(post=self.pk, is_published=True).select_related()
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.title, word_boundary=True, replacements=slug_replacements)
