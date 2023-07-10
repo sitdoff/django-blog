@@ -2,43 +2,49 @@
     <a>|</a>
 </li>
 {% if user.is_authenticated %}
-    {% if user.is_author %}
-        <li>
-            <a href="{% url 'add_post' %}">Добавить пост</a>
-        </li>
-        <li>
-            <a href="{% url 'drafts' %}">Черновики</a>
-        </li>
-    {% endif %}
-    {% if user.is_staff %}
-        <li>
-            <a href="{% url "unpublished_posts" %}">Неопубликованные посты</a>
-        </li>
-    {% endif %}
-    {% if user.is_author %}
-        {% if user.first_name %}
+    <div class="dropdown" style="float:right;">
+        <button class="dropbtn">
+            {% if user.is_author %}
+                {% if user.first_name %}
+                    <li>
+                        <a href="{% url "profile_edit" %}">{{ user.first_name }}</a>
+                    </li>
+                {% else %}
+                    <li>
+                        <a href="{% url "profile_edit" %}">{{ user.username }}</a>
+                    </li>
+                {% endif %}
+            {% else %}
+                {% if user.first_name %}
+                    <li>
+                        <a>{{ user.first_name }}</a>
+                    </li>
+                {% else %}
+                    <li>
+                        <a>{{ user.username }}</a>
+                    </li>
+                {% endif %}
+            {% endif %}
+        </button>
+        <div class="dropdown-content">
+            {% if user.is_author %}
+                <li>
+                    <a href="{% url 'add_post' %}">Добавить пост</a>
+                </li>
+                <li>
+                    <a href="{% url 'drafts' %}">Черновики</a>
+                </li>
+            {% endif %}
+            {% if user.is_staff %}
+                <li>
+                    <a href="{% url "unpublished_posts" %}">Неопубликованные посты</a>
+                </li>
+            {% endif %}
             <li>
-                <a href="{% url "profile_edit" %}">{{ user.first_name }}</a>
+                <a href="{% url 'logout' %}">Выйти</a>
             </li>
-        {% else %}
-            <li>
-                <a href="{% url "profile_edit" %}">{{ user.username }}</a>
-            </li>
-        {% endif %}
-    {% else %}
-        {% if user.first_name %}
-            <li>
-                <a>{{ user.first_name }}</a>
-            </li>
-        {% else %}
-            <li>
-                <a>{{ user.username }}</a>
-            </li>
-        {% endif %}
-    {% endif %}
-    <li>
-        <a href="{% url 'logout' %}">Выйти</a>
-    </li>
+        </div>
+    </div>
 {% else %}
     <li>
         <a href="{% url 'register' %}">Регистрация</a>
