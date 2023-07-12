@@ -9,7 +9,16 @@ from .models import CustomUser
 class CustomUserAdmin(UserAdmin):
     empty_value_display = "Пусто"
     readonly_fields = ("date_joined", "last_login")
-    list_display = ("username", "first_name", "email", "is_author", "is_staff", "is_superuser", "is_active")
+    list_display = (
+        "username",
+        "first_name",
+        "email",
+        "is_author",
+        "is_staff",
+        "is_superuser",
+        "is_active",
+        "is_banned",
+    )
     search_fields = ("username", "first_name", "email")
     list_filter = ("is_staff", "is_superuser", "is_active", "is_author")
     fieldsets = (
@@ -23,6 +32,7 @@ class CustomUserAdmin(UserAdmin):
                     "is_staff",
                     "is_superuser",
                     "is_active",
+                    "is_banned",
                 ),
             },
         ),

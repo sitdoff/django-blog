@@ -14,13 +14,18 @@ class CustomUser(AbstractUser):
     )
     bio = models.TextField(blank=True, verbose_name="О себе")
     is_author = models.BooleanField(default=False, verbose_name="Статус автора")
-    is_active = models.BooleanField(default=False, verbose_name="Активен?")
+    is_active = models.BooleanField(default=False, verbose_name="Активен")
+    is_banned = models.BooleanField(default=False, verbose_name="Заблокирован")
 
     def __str__(self):
         return self.username
 
     def get_absolute_url(self):
         return reverse("users:author_posts", kwargs={"username": self.username})
+
+    def activate(self):
+        if not self.is_banned:
+            self.is_active = True
 
     class Meta:
         verbose_name = "Пользователя"

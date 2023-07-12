@@ -70,10 +70,11 @@ def user_activate(request: HttpRequest, sign: str):
         return render(request, "users/bad_signature.html")
 
     user: CustomUser = get_object_or_404(CustomUser, username=username)
+
     if user.is_active:
         template = "users/user_is_active.html"
     else:
         template = "users/activation_done.html"
-        user.is_active = True
+        user.activate()
         user.save()
     return render(request, template)
