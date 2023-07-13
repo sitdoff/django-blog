@@ -1,0 +1,4 @@
+Package         Version
+--------------- -------
+django-ckeditor 6.5.1
+django-js-asset 2.0.0
