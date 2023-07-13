@@ -1,0 +1,14 @@
+Package              Version
+-------------------- -------
+asgiref              3.6.0
+Django               4.2
+django-ckeditor      6.5.1
+django-js-asset      2.0.0
+mysqlclient          2.1.1
+Pillow               9.5.0
+pip                  22.0.2
+python-dotenv        1.0.0
+python-slugify       8.0.1
+setuptools           59.6.0
+sqlparse             0.4.3
+text-unidecode       1.3
