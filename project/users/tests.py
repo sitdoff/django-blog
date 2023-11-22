@@ -98,6 +98,4 @@ class TestActivateUser(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.request["PATH_INFO"], "/user/activate/" + signer.sign(user.username))
-        # pprint(response.__dict__)
-        print(user.username, user.is_active)
         self.assertEqual(user.is_active, True)

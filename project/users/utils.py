@@ -3,20 +3,18 @@ from django.template.loader import render_to_string
 
 from neuron.settings import ALLOWED_HOSTS
 
-from .models import CustomUser
-
 # Create signer object
 signer = Signer()
 
 
-def user_directory_path(instance: CustomUser, filename: str) -> str:
+def user_directory_path(instance, filename: str) -> str:
     """Returns path for uploaded userpic"""
 
     # file will be uploaded to MEDIA_ROOT/userpic/username/<filename>
     return f"userpic/{instance.username}/{filename}"
 
 
-def send_activation_notification(user: CustomUser) -> None:
+def send_activation_notification(user) -> None:
     """Generate mail and send to user's email"""
     if ALLOWED_HOSTS:
         host = "http://" + ALLOWED_HOSTS[0]
