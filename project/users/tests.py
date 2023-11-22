@@ -64,6 +64,10 @@ class TestPermissions(CreateTestUsersAndPostsMixin, TestCase):
 
 
 class TestActivateUser(TestCase):
+    """
+    Checks user activation via link
+    """
+
     def setUp(self):
         self.client = Client()
 
@@ -74,13 +78,14 @@ class TestActivateUser(TestCase):
 
         # Creating user
         CustomUser.objects.create(username="user_in_not_active", email="user_is_not_active@test.com")
-        # self.sign: Signer = self.signer.sign(self.user.username)
 
     def test_activating_user(self):
         """
         Activating user account using link in the email
         """
         user: CustomUser = CustomUser.objects.get(username=self.username)
+        self.assertEqual(user.is_active, False)
+
         signer = Signer()
         sign: Signer = signer.sign(user.username)
         if ALLOWED_HOSTS:
