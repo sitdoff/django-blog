@@ -1,14 +1,9 @@
-from pprint import pprint
-
-from blog.models import Post
 from blog.tests import CreateTestUsersAndPostsMixin
 from django.core.signing import Signer
 from django.shortcuts import reverse
 from django.test import TestCase
 from django.test.client import Client
 from users.models import CustomUser
-from users.utils import send_activation_notification
-from users.views import user_activate
 
 from neuron.settings import ALLOWED_HOSTS
 
@@ -69,6 +64,9 @@ class TestActivateUser(TestCase):
     """
 
     def setUp(self):
+        """
+        Prepares data for the test
+        """
         self.client = Client()
 
         # initial user data

@@ -1,13 +1,13 @@
+from blog.mixins import TitleMixin
+from blog.models import Post
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.signing import BadSignature
+from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
 from django.views.generic.list import ListView
-
-from blog.mixins import TitleMixin
-from blog.models import Post
 
 from .forms import RegisterUserForm
 from .mixins import IsAuthorRequiredMixin
@@ -18,6 +18,10 @@ from .utils import signer
 
 
 class RegisterUser(TitleMixin, CreateView):
+    """
+    Create user
+    """
+
     title = "Регистрация"
     form_class = RegisterUserForm
     template_name = "users/register.html"
@@ -25,45 +29,66 @@ class RegisterUser(TitleMixin, CreateView):
 
 
 class LoginUser(TitleMixin, LoginView):
+    """
+    Login user
+    """
+
     title = "Вход"
     template_name = "users/login.html"
     next_page = reverse_lazy("home")
 
 
 class LogoutUser(LogoutView):
+    """
+    Logout user
+    """
+
     ...
 
 
 class EditProfileUser(IsAuthorRequiredMixin, TitleMixin, UpdateView):
+    """
+    Edits user profile
+    """
+
     title = "Данные автора"
     model = CustomUser
     template_name = "users/profile_edit.html"
     fields = ("photo", "first_name", "bio")
 
     def get_object(self, queryset=None):
+        """
+        Returns user object
+        """
         return self.request.user
 
 
 class AuthorPosts(TitleMixin, ListView):
+    """Author's posts"""
+
     model = Post
     template_name = "users/author_posts.html"
     context_object_name = "posts"
     paginate_by = 5
 
-    def setup(self, *args, **kwargs):
+    def setup(self, *args, **kwargs) -> None:
+        """Adds title attribute"""
         super().setup(*args, **kwargs)
         self.title = f"Посты автора {self.kwargs['username']}"
 
-    def get_context_data(self, *args, **kwargs):
+    def get_context_data(self, *args, **kwargs) -> dict:
+        """Adds author in context"""
         context = super().get_context_data(*args, **kwargs)
         context["author"] = get_object_or_404(CustomUser, username=self.kwargs["username"])
         return context
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
+        """Returns a set of posts"""
         return Post.objects.filter(author__username=self.kwargs["username"]).filter(is_published=True)
 
 
-def user_activate(request: HttpRequest, sign: str):
+def user_activate(request: HttpRequest, sign: str) -> HttpResponse:
+    """Checks sign and activates user."""
     try:
         username = signer.unsign(sign)
     except BadSignature:
