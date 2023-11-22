@@ -1,0 +1,44 @@
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+
+[tool.djlint]
+profile="django"
+blank_line_before_tag="load,extends,include,block"
+blank_line_after_tag="load,extends,include,endblock"
+indent=4
+ignore = "H006,"
+# line_break_after_multiline_tag=true
+close_void_tags=true
+custom_blocks="cache"
+[tool.poetry]
+name = "new-django-project"
+version = "0.1.0"
+description = ""
+authors = ["Roman Ivanov <sitdoff@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django = "^4.2.7"
+psycopg2-binary = "^2.9.9"
+environs = "^9.5.0"
+django-ckeditor = "6.5.1"
+python-slugify = "8.0.1"
+pillow = "10.1"
+
+
+[tool.poetry.group.dev.dependencies]
+django-extensions = "^3.2.3"
+django-debug-toolbar = "^4.2.0"
+werkzeug = "^3.0.1"
+django-types = "^0.19.1"
+djangorestframework-types = "^0.8.0"
+django-stubs = "^4.2.6"
+django-stubs-ext = "^4.2.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
