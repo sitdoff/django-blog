@@ -90,14 +90,16 @@ WSGI_APPLICATION = "neuron.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "neuron_db",
-        "USER": "user",
-        "PASSWORD": "password",
+        "ENGINE": os.getenv("DB_ENGINE"),
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        # "HOST": os.getenv("DB_HOST"),
         "HOST": "localhost",
-        "PORT": "3306",
+        "PORT": os.getenv("DB_PORT"),
     }
 }
 
@@ -156,4 +158,5 @@ CKEDITOR_UPLOAD_PATH = "images/"
 CKEDITOR_IMAGE_BACKEND = "pillow"
 CKEDITOR_JQUERY_URL = "//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"
 
-EMAIL_PORT = 1025
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_PORT = 1025

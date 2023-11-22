@@ -8,3 +8,17 @@ __pycache__/
 pyproject.toml
 media/
 todo.txt
+env/
+venv/
+.env/
+.venv/
+myvenv/
+__pycache__/
+*.py[cod]
+*.class
+*.log
+*.pot
+local_settings.py
+db.sqlite3
+.flake8
+pyproject.toml
