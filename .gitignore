@@ -5,7 +5,8 @@ myvenv/
 .env
 __pycache__/
 .flake8
-pyproject.toml
+.prettierrc.toml
+.pylintrc
 media/
 todo.txt
 env/
@@ -20,5 +21,5 @@ __pycache__/
 *.pot
 local_settings.py
 db.sqlite3
-.flake8
-pyproject.toml
+note
+/typings
