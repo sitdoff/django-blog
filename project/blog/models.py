@@ -1,9 +1,8 @@
 from ckeditor_uploader.fields import RichTextUploadingField
+from comments.models import Comment
 from django.db import models
 from django.urls import reverse
 from slugify import slugify
-
-from comments.models import Comment
 
 from .utils import slug_replacements
 
@@ -11,10 +10,15 @@ from .utils import slug_replacements
 
 
 class Post(models.Model):
+    """Post model"""
+
     title = models.CharField(max_length=150, verbose_name="Заголовок")
     slug = models.SlugField(max_length=150, db_index=True, verbose_name="URL SLUG", unique=True)
     epigraph = models.CharField(max_length=256, blank=True, verbose_name="Эпиграф")
+
+    # ckeditor field
     article = RichTextUploadingField(verbose_name="Текст")
+
     author = models.ForeignKey("users.CustomUser", on_delete=models.PROTECT, verbose_name="Автор")
     image = models.ImageField(upload_to="images/%Y/%m/%d/", blank=True, verbose_name="Титульное изображение")
     time_create = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")
@@ -27,16 +31,21 @@ class Post(models.Model):
         return self.title
 
     def get_absolute_url(self):
+        """Return post url"""
         return reverse("post", kwargs={"post_slug": self.slug})
 
     def get_comments(self):
+        """Returns comments"""
         return Comment.objects.filter(post=self.pk, is_published=True).select_related()
 
     def save(self, *args, **kwargs):
+        """Add custom slug"""
         self.slug = slugify(self.title, word_boundary=True, replacements=slug_replacements)
         return super().save(*args, **kwargs)
 
     class Meta:
+        """Metadata"""
+
         verbose_name = "Пост"
         verbose_name_plural = "Посты"
         ordering = ["-time_create"]

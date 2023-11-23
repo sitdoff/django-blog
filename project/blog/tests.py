@@ -1,13 +1,14 @@
+from blog.models import Post
 from django.shortcuts import reverse
 from django.test import TestCase
-
-from blog.models import Post
 from users.models import CustomUser
 
 # Create your tests here.
 
 
 class CreateTestUsersAndPostsMixin:
+    """Create users and post's objects for tests"""
+
     users = [
         {"username": "user", "email": "user@test.com", "is_active": True},
         {"username": "author", "email": "author@test.com", "is_author": True, "is_active": True},
@@ -28,7 +29,7 @@ class CreateTestUsersAndPostsMixin:
     }
 
     def setUp(self):
-        """Create users and posts"""
+        """Create users and posts from class's data"""
 
         self.test_users = [None]
         self.test_posts = []
@@ -44,6 +45,8 @@ class CreateTestUsersAndPostsMixin:
 
 
 class TestBlog(CreateTestUsersAndPostsMixin, TestCase):
+    """Checks the availability of public pages"""
+
     pages = {
         "home": {"url": "/", "kwargs": {}},
         "about": {"url": "/about", "kwargs": {}},
@@ -56,6 +59,7 @@ class TestBlog(CreateTestUsersAndPostsMixin, TestCase):
     }
 
     def test_pages(self):
+        """Creates addresses of public pages and checks their availability."""
         for url_name in self.pages:
             url = reverse(url_name, kwargs=self.pages[url_name]["kwargs"])
             response = self.client.get(url)

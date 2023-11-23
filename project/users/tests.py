@@ -59,14 +59,10 @@ class TestPermissions(CreateTestUsersAndPostsMixin, TestCase):
 
 
 class TestActivateUser(TestCase):
-    """
-    Checks user activation via link
-    """
+    """Checks user activation via link"""
 
     def setUp(self):
-        """
-        Prepares data for the test
-        """
+        """Prepares data for the test"""
         self.client = Client()
 
         # initial user data
@@ -78,9 +74,7 @@ class TestActivateUser(TestCase):
         CustomUser.objects.create(username="user_in_not_active", email="user_is_not_active@test.com")
 
     def test_activating_user(self):
-        """
-        Activating user account using link in the email
-        """
+        """Activating user account using link in the email"""
         user: CustomUser = CustomUser.objects.get(username=self.username)
         self.assertEqual(user.is_active, False)
 

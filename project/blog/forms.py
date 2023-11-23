@@ -4,7 +4,11 @@ from .models import Post
 
 
 class AddPostForm(forms.ModelForm):
+    """Form for add post"""
+
     class Meta:
+        """Metadata"""
+
         model = Post
         fields = ("title", "epigraph", "article", "image", "is_draft")
         widgets = {
@@ -15,5 +19,9 @@ class AddPostForm(forms.ModelForm):
 
 
 class EditStaffPostForm(AddPostForm):
+    """Form for editing post"""
+
     class Meta(AddPostForm.Meta):
+        """Metadata"""
+
         fields = ("title", "epigraph", "article", "image", "is_published")

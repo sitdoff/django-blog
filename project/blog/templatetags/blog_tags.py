@@ -12,9 +12,11 @@ navigation_menu = [
 
 @register.inclusion_tag("blog/navigation_menu.html")
 def navigation(user):
+    """Insert navigation menu in template"""
     return {"navigation_menu": navigation_menu, "user": user}
 
 
 @register.inclusion_tag("blog/pagination.html")
 def pagination(paginator, page_obj):
+    """Inser pagination in template"""
     return {"page_obj": page_obj, "paginator": paginator}

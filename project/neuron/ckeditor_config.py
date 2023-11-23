@@ -1,3 +1,4 @@
+# Settings for ckeditor
 CKEDITOR_CONFIGS = {
     "default": {
         "toolbar_Custom": [
