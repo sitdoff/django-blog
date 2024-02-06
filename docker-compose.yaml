@@ -1,0 +1,28 @@
+services:
+    db:
+        image: postgres
+        environment:
+            - POSTGRES_DB=postgres
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+        volumes:
+            - neuron_postgres-data:/var/lib/postgresql/data/
+        ports:
+            - 5432:5432
+
+    web:
+        build: .
+        command: python manage.py runserver 0.0.0.0:8000
+        volumes:
+            - ./project:/code
+        ports:
+            - "8000:8000"
+        environment:
+            - POSTGRES_NAME=postgres
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+        depends_on:
+            - db
+
+volumes:
+    neuron_postgres-data:
