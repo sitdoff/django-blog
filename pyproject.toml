@@ -1,3 +1,13 @@
+[tool.pyright]
+reportIncompatibleMethodOverride = false
+reportIncompatibleVariableOverride = false
+
+[tool.mypy]
+plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
+
+[tool.django-stubs]
+django_settings_module = "neuron.settings"
+
 [tool.black]
 line-length = 120
 
@@ -13,8 +23,9 @@ ignore = "H006,"
 # line_break_after_multiline_tag=true
 close_void_tags=true
 custom_blocks="cache"
+
 [tool.poetry]
-name = "new-django-project"
+name = "neuron-blog"
 version = "0.1.0"
 description = ""
 authors = ["Roman Ivanov <sitdoff@gmail.com>"]
@@ -34,10 +45,9 @@ pillow = "10.1"
 django-extensions = "^3.2.3"
 django-debug-toolbar = "^4.2.0"
 werkzeug = "^3.0.1"
-django-types = "^0.19.1"
-djangorestframework-types = "^0.8.0"
-django-stubs = "^4.2.6"
+django-stubs = {extras = ["compatible-mypy"], version = "^4.2.7"}
 django-stubs-ext = "^4.2.5"
+djangorestframework-stubs = {extras = ["compatible-mypy"], version = "^3.14.5"}
 
 [build-system]
 requires = ["poetry-core"]
