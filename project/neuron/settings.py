@@ -16,9 +16,8 @@ from pathlib import Path
 import django_stubs_ext
 from dotenv import load_dotenv
 
-from .ckeditor_config import CKEDITOR_CONFIGS
-
 django_stubs_ext.monkeypatch()
+from .ckeditor_config import CKEDITOR_CONFIGS
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,9 +36,17 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-INTERNAL_IPS = [
-    "127.0.0.1",
-]
+# TODO uncomment this
+# INTERNAL_IPS = [
+#     "127.0.0.1",
+# ]
+
+# TODO delete this
+if DEBUG:
+    import socket  # only if you haven't already imported this
+
+    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    INTERNAL_IPS = [ip[:-1] + "1" for ip in ips]
 
 
 # Application definition
@@ -51,11 +58,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "debug_toolbar",
+    "django_extensions",
+    "ckeditor",
     "blog.apps.BlogConfig",
     "users.apps.UsersConfig",
     "comments.apps.CommentsConfig",
-    "ckeditor",
-    "debug_toolbar",
 ]
 
 MIDDLEWARE = [
@@ -96,13 +104,12 @@ WSGI_APPLICATION = "neuron.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": os.getenv("DB_ENGINE"),
-        "NAME": os.getenv("DB_NAME"),
-        "USER": os.getenv("DB_USER"),
-        "PASSWORD": os.getenv("DB_PASSWORD"),
-        # "HOST": os.getenv("DB_HOST"),
-        "HOST": "localhost",
-        "PORT": os.getenv("DB_PORT"),
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB"),
+        "USER": os.getenv("POSTGRES_USER"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+        "HOST": os.getenv("POSTGRES_HOST"),
+        "PORT": os.getenv("POSTGRES_PORT"),
     }
 }
 
