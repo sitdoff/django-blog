@@ -25,3 +25,4 @@ note
 /typings
 /project/entrypoint.sh
 /project/wait-for-it.sh
+/project/fixture.json
