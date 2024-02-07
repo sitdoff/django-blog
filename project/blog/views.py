@@ -35,11 +35,10 @@ class IndexView(TitleMixin, ListView):
         .select_related()
     )
 
-    def get_context_data(self, *, object_list=None, **kwargs):
+    def get_context_data(self, *, object_list=None, **kwargs) -> dict:
         """Add in context pinned post object"""
         context = super().get_context_data(**kwargs)
-        pinned_posts = self.model.objects.filter(is_pinned=True).select_related()
-        if pinned_posts:
+        if pinned_posts := self.model.objects.filter(is_pinned=True).select_related():
             context["pinned_posts"] = pinned_posts
         return context
 
@@ -104,11 +103,10 @@ class PostDetailView(DetailView):
             context = super().get_context_data(**kwargs)
             context["form"] = self.comment_form()
             return self.render_to_response(context=context)
-        else:
-            self.object = self.get_object()
-            context = super().get_context_data(**kwargs)
-            context["form"] = form
-            return self.render_to_response(context=context)
+        self.object = self.get_object()
+        context = super().get_context_data(**kwargs)
+        context["form"] = form
+        return self.render_to_response(context=context)
 
 
 class UnpublishedPostDetailView(IsStaffRequiredMixin, PostDetailView):
