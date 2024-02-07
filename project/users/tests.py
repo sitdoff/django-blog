@@ -1,4 +1,5 @@
 from blog.tests import CreateTestUsersAndPostsMixin
+from django.core import mail
 from django.core.signing import Signer
 from django.shortcuts import reverse
 from django.test import TestCase
@@ -6,6 +7,8 @@ from django.test.client import Client
 from users.models import CustomUser
 
 from neuron.settings import ALLOWED_HOSTS
+
+from .utils import send_activation_notification
 
 # Create your tests here.
 # Users for tests
@@ -17,14 +20,35 @@ class TestPermissions(CreateTestUsersAndPostsMixin, TestCase):
     # key - url name
     # value - access
     pages = {
-        "add_post": {"access": ("author", "authorstaff", "admin"), "kwargs": {}},
-        "drafts": {"access": ("author", "authorstaff", "admin"), "kwargs": {}},
-        "unpublished_posts": {"access": ("staff", "authorstaff", "admin"), "kwargs": {}},
-        "draft": {"access": ("author", "admin"), "kwargs": {"post_slug": "draft-post"}},
-        "edit_draft": {"access": ("author", "admin"), "kwargs": {"post_slug": "draft-post"}},
-        "unpublished_post": {"access": ("staff", "authorstaff", "admin"), "kwargs": {"post_slug": "unpublished-post"}},
+        "add_post": {
+            "access": ("author", "authorstaff", "admin"),
+            "kwargs": {},
+        },
+        "drafts": {
+            "access": ("author", "authorstaff", "admin"),
+            "kwargs": {},
+        },
+        "unpublished_posts": {
+            "access": ("staff", "authorstaff", "admin"),
+            "kwargs": {},
+        },
+        "draft": {
+            "access": ("author", "admin"),
+            "kwargs": {"post_slug": "draft-post"},
+        },
+        "edit_draft": {
+            "access": ("author", "admin"),
+            "kwargs": {"post_slug": "draft-post"},
+        },
+        "unpublished_post": {
+            "access": ("staff", "authorstaff", "admin"),
+            "kwargs": {"post_slug": "unpublished-post"},
+        },
         "edit_post": {"access": ("staff", "authorstaff", "admin"), "kwargs": {"post_slug": "unpublished-post"}},
-        "users:profile_edit": {"access": ("author", "authorstaff", "admin"), "kwargs": {}},
+        "users:profile_edit": {
+            "access": ("author", "authorstaff", "admin"),
+            "kwargs": {},
+        },
     }
 
     def test_permissions(self):
@@ -73,6 +97,21 @@ class TestActivateUser(TestCase):
         # Creating user
         CustomUser.objects.create(username="user_in_not_active", email="user_is_not_active@test.com")
 
+    def test_sending_an_activation_mail(self):
+        """
+        Testing sending an activation letter when registering a user.
+        """
+        user: CustomUser = CustomUser.objects.get(username=self.username)
+        self.assertEqual(user.is_active, False)
+
+        signer = Signer()
+        sign: Signer = signer.sign(user.username)
+
+        send_activation_notification(user)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].subject, "Активация пользователя user_in_not_active")
+        self.assertIn(sign, mail.outbox[0].body)
+
     def test_activating_user(self):
         """Activating user account using link in the email"""
         user: CustomUser = CustomUser.objects.get(username=self.username)
@@ -80,6 +119,7 @@ class TestActivateUser(TestCase):
 
         signer = Signer()
         sign: Signer = signer.sign(user.username)
+
         if ALLOWED_HOSTS:
             host = "http://" + ALLOWED_HOSTS[0]
         else:
