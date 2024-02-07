@@ -85,14 +85,18 @@ class PostDetailView(DetailView):
     comment_form = CommentForm
 
     def get_context_data(self, *, object_list=None, **kwargs):
-        """Add in context comment form object"""
+        """
+        Add in context comment form object
+        """
         context = super().get_context_data(**kwargs)
         if self.request.method == "GET":
             context["form"] = self.comment_form()
         return context
 
     def post(self, request, *args, **kwargs):
-        """Create post comment, if method is POST"""
+        """
+        Create post comment, if method is POST
+        """
         post = get_object_or_404(self.model, slug=kwargs["post_slug"])
         author = request.user
         content = request.POST["content"]
@@ -110,7 +114,9 @@ class PostDetailView(DetailView):
 
 
 class UnpublishedPostDetailView(IsStaffRequiredMixin, PostDetailView):
-    """Unpublished post detail view"""
+    """
+    Unpublished post detail view
+    """
 
     model = Post
     queryset = model.objects.filter(is_draft=False).filter(is_published=False)
