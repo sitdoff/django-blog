@@ -1,5 +1,6 @@
 from blog.mixins import TitleMixin
 from blog.models import Post
+from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.signing import BadSignature
 from django.db.models.query import QuerySet
@@ -102,4 +103,7 @@ def user_activate(request: HttpRequest, sign: str) -> HttpResponse:
         template = "users/activation_done.html"
         user.activate()
         user.save()
+        user.backend = "django.contrib.auth.backends.ModelBackend"
+        login(request, user)
+
     return render(request, template)
