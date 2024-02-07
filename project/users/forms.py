@@ -1,7 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 
-from .apps import user_registered
 from .models import CustomUser
 
 
@@ -16,12 +15,6 @@ class RegisterUserForm(UserCreationForm):
     def save(self, commit=True):
         """Set password for user object"""
         user = super().save(commit=False)
-        user.set_password(self.cleaned_data["password1"])
-        if commit:
-            user.save()
-            if hasattr(self, "save_m2m"):
-                self.save_m2m()
-        user_registered.send(RegisterUserForm, instance=user)
         return user
 
     class Meta:
