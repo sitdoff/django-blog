@@ -170,3 +170,11 @@ CKEDITOR_JQUERY_URL = "//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.j
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # EMAIL_PORT = 1025
+
+# Celery settings
+
+CELERY_BROKER_URL = "redis://redis:6379/0"
+CELERY_RESULT_BACKEND = "redis://redis:6379/0"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_TIMEZONE = "Europe/Moscow"

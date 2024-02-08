@@ -2,7 +2,9 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 
 from .models import CustomUser
-from .utils import send_activation_notification
+from .tasks import send_activation_email_task
+
+# from .utils import send_activation_notification
 
 
 class RegisterUserForm(UserCreationForm):
@@ -17,7 +19,7 @@ class RegisterUserForm(UserCreationForm):
         """Set password for user object"""
         user = super().save(commit=False)
         user.save()
-        send_activation_notification(user)
+        send_activation_email_task.delay(user.id)
         return user
 
     class Meta:
