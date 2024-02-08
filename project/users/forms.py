@@ -4,8 +4,6 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser
 from .tasks import send_activation_email_task
 
-# from .utils import send_activation_notification
-
 
 class RegisterUserForm(UserCreationForm):
     """Form for register users"""
