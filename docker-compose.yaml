@@ -26,6 +26,17 @@ services:
         depends_on:
             - db
             - redis
+
+    flower:
+        image: mher/flower
+        ports:
+            - "5555:5555"
+        environment:
+            CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+            FLOWER_PORT: 5555
+        depends_on:
+            - celery
+
     web:
         build: .
         # command: python manage.py runserver 0.0.0.0:8000
