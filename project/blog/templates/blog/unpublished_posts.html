@@ -18,7 +18,7 @@
                         <div class="blog-post-thumb">
                             {% if post.is_draft %}
                                 <h3>
-                                    <span style="color: red">[ЧЕРНОВИК]</span>
+                                    <span style="color: red">[DRAFT]</span>
                                 </h3>
                             {% elif not post.is_published %}
                                 <h3>
@@ -52,5 +52,6 @@
                     </div>
                 </div>
             </div>
-        </section>
-    {% endblock content %}
+        </div>
+    </section>
+{% endblock content %}
