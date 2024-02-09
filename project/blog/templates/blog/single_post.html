@@ -1,118 +1,120 @@
-{% extends "blog/base.html" %}
-{% load users_tags %}
-{% block title %}
-    {{ post.title }}
-{% endblock title %}
-{% block content %}
-    {% if post.epigraph %}
-        <!-- Home Section -->
-        {% if post.image %}
-            <style type="text/css">
+{% extends "blog/base.html" %} {% load users_tags %}
+{% load blog_tags %}
+{% block title %} {{ post.title }} {% endblock title %} {% block content %} {% if post.epigraph %}
+<!-- Home Section -->
+{% if post.image %}
+<style type="text/css">
         .main-single-post {
             background: url({{ post.image.url }});
             no-repeat;
-        
+
     }
-            </style>
-        {% endif %}
-        <section id="home" class="main-single-post parallax-section">
-            <div class="overlay"></div>
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12 col-sm-12">
-                        <h1>{{ post.epigraph }}</h1>
-                    </div>
-                </div>
+</style>
+{% endif %}
+<section id="home" class="main-single-post parallax-section">
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+                <h1>{{ post.epigraph }}</h1>
             </div>
-        </section>
-    {% endif %}
-    <!-- Blog Single Post Section -->
-    <section id="blog-single-post">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-offset-1 col-md-10 col-sm-12">
-                    <div class="blog-single-post-thumb">
-                        <!-- Title -->
-                        <div class="blog-post-title">
-                            <h2>
-                                {% if post.is_draft %}
-                                    <span style="color: red">[Черновик]</span>
-                                {% elif not post.is_published %}
-                                    <span style="color: red">[UNPUBLISHED]</span>
-                                {% endif %}
-                                {{ post.title }}
-                            </h2>
+        </div>
+    </div>
+</section>
+{% endif %}
+<!-- Blog Single Post Section -->
+<section id="blog-single-post">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-offset-1 col-md-10 col-sm-12">
+                <div class="blog-single-post-thumb">
+                    {% staff_buttons_for_unpublished_single_post_tag %}
+                    <!-- Title -->
+                    <div class="blog-post-title">
+                        <h2>
+                            {% if post.is_draft %}
+                            <span style="color: red">[ЧЕРНОВИК]</span>
+                            <br />
+                            {% elif not post.is_published %}
+                            <span style="color: red">[UNPUBLISHED]</span><br />
+                            {% endif %} {{ post.title }}
+                        </h2>
+                    </div>
+                    <!-- Info -->
+                    <div class="blog-post-format">
+                        {% author_info post.author %}
+                        <span><i class="fa fa-date"></i>{{ post.time_create }}</span>
+                        {% if post.editor and not post.is_published %}<span style="color: green"
+                            >Редактор: {{ post.editor }}</span
+                        >{% endif %}
+                        <!-- <span><a href="#"><i class="fa fa-comment-o"></i> 124 Comments</a></span> -->
+                    </div>
+                    <!-- Article -->
+                    <div class="blog-post-des">
+                        {% if post.image %}
+                        <!-- Image -->
+                        <div class="blog-post-image">
+                            <img src="{{ post.image.url }}" class="img-responsive" alt="Blog Image 3" />
                         </div>
-                        <!-- Info -->
-                        <div class="blog-post-format">
-                            {% author_info post.author %}
-                            <span><i class="fa fa-date"></i>{{ post.time_create }}</span>
-                            <!-- <span><a href="#"><i class="fa fa-comment-o"></i> 124 Comments</a></span> -->
-                        </div>
-                        <!-- Article -->
-                        <div class="blog-post-des">
-                            {% if post.image %}
-                                <!-- Image -->
-                                <div class="blog-post-image">
-                                    <img src="{{ post.image.url }}" class="img-responsive" alt="Blog Image 3">
-                                </div>
-                            {% endif %}
-                            {{ post.article|safe }}
-                        </div>
-                        <!-- Author -->
-                        <div class="blog-author">
-                            <div class="media">
-                                <div class="media-object pull-left">
-                                    <img src="{{ post.author.photo.url }}"
-                                         class="img-circle img-responsive"
-                                         alt="blog">
-                                </div>
-                                <div class="media-body">
-                                    <h3 class="media-heading">
-                                        <a href="#">{{ post.author.first_name }}</a>
-                                    </h3>
-                                    <p>{{ post.author.bio }}</p>
-                                </div>
+                        {% endif %} {{ post.article|safe }}
+                    </div>
+                    {% staff_buttons_for_unpublished_single_post_tag %}
+                    <!-- Author -->
+                    <div class="blog-author">
+                        <div class="media">
+                            <div class="media-object pull-left">
+                                <img src="{{ post.author.photo.url }}" class="img-circle img-responsive" alt="blog" />
+                            </div>
+                            <div class="media-body">
+                                <h3 class="media-heading">
+                                    <a href="#">{{ post.author.first_name|default:post.author.username }}</a>
+                                </h3>
+                                <p>{{ post.author.bio }}</p>
                             </div>
                         </div>
-                        <!-- Commenst -->
-                        <div class="blog-comment">
-                            <h3>Комментарии</h3>
-                            {% for comment in post.get_comments %}
-                                {% if comment.is_published %}
-                                    <div class="media">
-                                        <div class="media-object pull-left">
-                                            <img src="{{ comment.author.photo.url }}"
-                                                 class="img-responsive img-circle"
-                                                 alt="Blog Image 11">
-                                        </div>
-                                        <div class="media-body">
-                                            <h3 class="media-heading">{{ comment.author.first_name|default:comment.author.username }}</h3>
-                                            <span>{{ comment.time_create }}</span>
-                                            <p>{{ comment.content }}</p>
-                                        </div>
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                        {% if user.is_authenticated %}
-                            <div class="blog-comment-form">
-                                <h3>Оставьте комментарий</h3>
-                                <form method="post">
-                                    {% csrf_token %}
-                                    {{ form.as_p }}
-                                    <div class="col-md-3 col-sm-4">
-                                        <input name="submit"
-                                               type="submit"
-                                               class="form-control"
-                                               id="submit"
-                                               value="Post Your Comment">
-                                    </div>
-                                </form>
-                            </div>
-                        {% endif %}
                     </div>
+                    <!-- Commenst -->
+                    <div class="blog-comment">
+                        <h3>Комментарии</h3>
+                        {% for comment in post.get_comments %} {% if comment.is_published %}
+                        <div class="media">
+                            <div class="media-object pull-left">
+                                <img
+                                    src="{{ comment.author.photo.url }}"
+                                    class="img-responsive img-circle"
+                                    alt="Blog Image 11"
+                                />
+                            </div>
+                            <div class="media-body">
+                                <h3 class="media-heading">
+                                    {{ comment.author.first_name|default:comment.author.username }}
+                                </h3>
+                                <span>{{ comment.time_create }}</span>
+                                <p>{{ comment.content }}</p>
+                            </div>
+                        </div>
+                        {% endif %} {% endfor %}
+                    </div>
+                    {% if user.is_authenticated %}
+                    <div class="blog-comment-form">
+                        <h3>Оставьте комментарий</h3>
+                        <form method="post">
+                            {% csrf_token %} {{ form.as_p }}
+                            <div class="col-md-3 col-sm-4">
+                                <input
+                                    name="submit"
+                                    type="submit"
+                                    class="form-control"
+                                    id="submit"
+                                    value="Post Your Comment"
+                                />
+                            </div>
+                        </form>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
-        </section>
-    {% endblock content %}
+        </div>
+    </div>
+</section>
+{% endblock content %}
