@@ -1,0 +1,16 @@
+{% if request.user.is_staff and not post.is_draft %}
+    <form method="post" action="{% url 'set_editor' %}" class="form-inline">
+        <a href="{% url 'unpublished_post' post.slug %}" class="btn btn-success">Читать</a>
+        {% if not post.editor %}
+            <input type="hidden" name="post_slug" value="{{ post.slug }}" />
+            <button type="submit" class="btn btn-danger">Взять на редактирование</button>
+            <!-- <a href="{% url 'set_editor' %}" class="btn btn-default">Назначить редактора</a> -->
+        {% elif post.editor == request.user %}
+            <a href="{% url 'edit_post' post.slug %}" class="btn btn-danger">Редактировать</a>
+        {% endif %}
+        {% csrf_token %}
+    </form>
+{% elif user.is_author and post.is_draft %}
+    <a href="{% url 'draft' post.slug %}" class="btn btn-default">Читать</a>
+    <a href="{% url 'edit_draft' post.slug %}" class="btn btn-default">Edit</a>
+{% endif %}

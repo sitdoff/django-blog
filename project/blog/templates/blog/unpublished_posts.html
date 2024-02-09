@@ -1,11 +1,14 @@
 {% extends "blog/base.html" %}
+
 {% load blog_tags %}
+
 {% load users_tags %}
+
 {% block title %}
     {{ title }}
 {% endblock title %}
+
 {% block content %}
-    <!-- Home Section -->
     <!-- Blog Section -->
     <section id="blog">
         <div class="container">
@@ -15,7 +18,7 @@
                         <div class="blog-post-thumb">
                             {% if post.is_draft %}
                                 <h3>
-                                    <span style="color: red">[Черновик]</span>
+                                    <span style="color: red">[ЧЕРНОВИК]</span>
                                 </h3>
                             {% elif not post.is_published %}
                                 <h3>
@@ -25,7 +28,7 @@
                             {% if post.image %}
                                 <div class="blog-post-image">
                                     <a>
-                                        <img src="{{ post.image.url }}" class="img-responsive" alt="Blog Image">
+                                        <img src="{{ post.image.url }}" class="img-responsive" alt="Blog Image" />
                                     </a>
                                 </div>
                             {% endif %}
@@ -37,24 +40,17 @@
                             <div class="blog-post-format">
                                 {% author_info post.author %}
                                 <span><i class="fa fa-date"></i>{{ post.time_create }}</span>
-                                <!-- <span><a href="#"><i class="fa fa-comment-o"></i> 35 Comments</a></span> -->
+                                {% if post.editor %}<span style="color: green">Редактор: {{ post.editor }}</span>{% endif %}
                             </div>
                             <div class="blog-post-des">
                                 <p>{{ post.article|safe|truncatewords:100 }}</p>
-                                {% if user.is_staff and not post.is_draft %}
-                                    <a href="{% url 'unpublished_post' post.slug %}" class="btn btn-default">Читать</a>
-                                    <a href="{% url 'edit_post' post.slug %}" class="btn btn-default">Edit</a>
-                                {% elif user.is_author and post.is_draft %}
-                                    <a href="{% url 'draft' post.slug %}" class="btn btn-default">Читать</a>
-                                    <a href="{% url 'edit_draft' post.slug %}" class="btn btn-default">Edit</a>
-                                {% endif %}
                             </div>
-                        </div>
-                    {% endfor %}
-                    <!-- Блок пагинации -->
-                    {% pagination paginator page_obj %}
+                            {% staff_buttons_for_unpublished_posts_tag %}
+                        {% endfor %}
+                        <!-- Блок пагинации -->
+                        {% pagination paginator page_obj %}
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
-{% endblock content %}
+        </section>
+    {% endblock content %}
