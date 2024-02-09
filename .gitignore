@@ -26,3 +26,4 @@ note
 /project/entrypoint.sh
 /project/wait-for-it.sh
 /project/fixture.json
+migrations/
