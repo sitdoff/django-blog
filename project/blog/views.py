@@ -153,7 +153,9 @@ class EditUnpublishedPost(IsStaffRequiredMixin, TitleMixin, UpdateView):
     form_class = EditStaffPostForm
     template_name = "blog/edit_post.html"
     slug_url_kwarg = "post_slug"
-    success_url = reverse_lazy("home")
+
+    def get_success_url(self):
+        return reverse_lazy("unpublished_post", kwargs={"post_slug": self.object.slug})
 
 
 class EditDraftPost(IsAuthorDraftRequiredMixin, TitleMixin, UpdateView):
