@@ -1,4 +1,4 @@
-{% if request.user.is_staff and not post.is_draft %}
+{% if request.user.is_staff and not post.is_draft and not post.is_published %}
     {% if not post.editor %}
         <form method="post" action="{% url 'set_editor' %}">
             {% csrf_token %}
