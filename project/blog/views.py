@@ -1,8 +1,10 @@
 from comments.forms import CommentForm
 from comments.models import Comment
+from django.contrib.auth.decorators import user_passes_test
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
+from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, UpdateView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
@@ -169,15 +171,19 @@ class EditDraftPost(IsAuthorDraftRequiredMixin, TitleMixin, UpdateView):
     success_url = reverse_lazy("drafts")
 
 
-def set_editor(request: HttpRequest):
+@user_passes_test(lambda user: user.is_staff)
+@require_POST
+def set_editor(request: HttpRequest) -> HttpResponseRedirect:
     """
     Sets the editor for the post.
     """
     post: Post = get_object_or_404(Post, slug=request.POST["post_slug"])
-    if request.user.is_staff and not post.editor:
+    if not post.editor:
         post.editor = request.user
         post.save()
-    return HttpResponseRedirect(reverse("unpublished_post", kwargs={"post_slug": post.slug}))
+        return HttpResponseRedirect(reverse_lazy("unpublished_post", kwargs={"post_slug": post.slug}))
+    # TODO make message
+    return HttpResponseRedirect(reverse_lazy("unpublished_posts"))
 
 
 def about(request):
