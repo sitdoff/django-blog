@@ -20,3 +20,11 @@ def navigation(user):
 def pagination(paginator, page_obj):
     """Inser pagination in template"""
     return {"page_obj": page_obj, "paginator": paginator}
+
+
+@register.inclusion_tag("blog/tags_templates/staff_buttons_for_unpublished_posts.html", takes_context=True)
+def staff_buttons_for_unpublished_posts_tag(context):
+    """
+    Inserts buttons to assign an editor or read a post.
+    """
+    return {"post": context["post"], "request": context["request"]}
