@@ -15,43 +15,46 @@
             <div class="row">
                 <div class="col-md-offset-1 col-md-10 col-sm-12">
                     {% for post in posts %}
-                        <div class="blog-post-thumb">
-                            {% if post.is_draft %}
-                                <h3>
-                                    <span style="color: red">[DRAFT]</span>
-                                </h3>
-                            {% elif not post.is_published %}
-                                <h3>
-                                    <span style="color: red">[UNPUBLISHED]</span>
-                                </h3>
-                            {% endif %}
-                            {% if post.image %}
-                                <div class="blog-post-image">
-                                    <a>
-                                        <img src="{{ post.image.url }}" class="img-responsive" alt="Blog Image" />
-                                    </a>
+                        {% if post.editor is None or post.editor is request.user %}
+                            <div class="blog-post-thumb">
+                                {% if post.is_draft %}
+                                    <h3>
+                                        <span style="color: red">[DRAFT]</span>
+                                    </h3>
+                                {% elif not post.is_published %}
+                                    <h3>
+                                        <span style="color: red">[UNPUBLISHED]</span>
+                                    </h3>
+                                {% endif %}
+                                {% if post.image %}
+                                    <div class="blog-post-image">
+                                        <a>
+                                            <img src="{{ post.image.url }}" class="img-responsive" alt="Blog Image" />
+                                        </a>
+                                    </div>
+                                {% endif %}
+                                <div class="blog-post-title">
+                                    <h3>
+                                        <a>{{ post.title }}</a>
+                                    </h3>
                                 </div>
-                            {% endif %}
-                            <div class="blog-post-title">
-                                <h3>
-                                    <a>{{ post.title }}</a>
-                                </h3>
+                                <div class="blog-post-format">
+                                    {% author_info post.author %}
+                                    <span><i class="fa fa-date"></i>{{ post.time_create }}</span>
+                                    {% if post.editor %}<span style="color: green">Редактор: {{ post.editor }}</span>{% endif %}
+                                </div>
+                                <div class="blog-post-des">
+                                    <p>{{ post.article|safe|truncatewords:100 }}</p>
+                                </div>
+                                {% staff_buttons_for_unpublished_posts_tag %}
                             </div>
-                            <div class="blog-post-format">
-                                {% author_info post.author %}
-                                <span><i class="fa fa-date"></i>{{ post.time_create }}</span>
-                                {% if post.editor %}<span style="color: green">Редактор: {{ post.editor }}</span>{% endif %}
-                            </div>
-                            <div class="blog-post-des">
-                                <p>{{ post.article|safe|truncatewords:100 }}</p>
-                            </div>
-                            {% staff_buttons_for_unpublished_posts_tag %}
-                        {% endfor %}
-                        <!-- Блок пагинации -->
-                        {% pagination paginator page_obj %}
-                    </div>
+                        {% endif %}
+                    {% endfor %}
+                    <!-- Блок пагинации -->
+                    {% pagination paginator page_obj %}
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 {% endblock content %}
