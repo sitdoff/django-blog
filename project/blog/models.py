@@ -19,7 +19,12 @@ class Post(models.Model):
     # ckeditor field
     article = RichTextUploadingField(verbose_name="Текст")
 
-    author = models.ForeignKey("users.CustomUser", on_delete=models.PROTECT, verbose_name="Автор")
+    author = models.ForeignKey(
+        "users.CustomUser", on_delete=models.PROTECT, verbose_name="Автор", related_name="author_posts"
+    )
+    editor = models.ForeignKey(
+        "users.CustomUser", on_delete=models.SET_NULL, null=True, verbose_name="Редактор", related_name="editor_posts"
+    )
     image = models.ImageField(upload_to="images/%Y/%m/%d/", blank=True, verbose_name="Титульное изображение")
     time_create = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")
     time_update = models.DateTimeField(auto_now=True, verbose_name="Время редактирования")
