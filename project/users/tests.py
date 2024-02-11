@@ -107,7 +107,7 @@ class TestActivateUser(TestCase):
         signer = Signer()
         sign: Signer = signer.sign(user.username)
 
-        send_activation_notification(user)
+        send_activation_notification(user.id)
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, "Активация пользователя user_in_not_active")
         self.assertIn(sign, mail.outbox[0].body)
