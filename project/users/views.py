@@ -26,7 +26,7 @@ class RegisterUser(TitleMixin, CreateView):
     title = "Регистрация"
     form_class = RegisterUserForm
     template_name = "users/register.html"
-    success_url = reverse_lazy("home")
+    success_url = reverse_lazy("users:activation_mail_sended")
 
 
 class LoginUser(TitleMixin, LoginView):
