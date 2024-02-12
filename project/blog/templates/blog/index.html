@@ -1,9 +1,13 @@
 {% extends "blog/base.html" %}
+
 {% load blog_tags %}
+
 {% load users_tags %}
+
 {% block title %}
     {{ title }}
 {% endblock title %}
+
 {% block content %}
     <!-- Home Section -->
     <section id="home" class="main-home parallax-section">
@@ -14,7 +18,7 @@
                 <div class="col-md-12 col-sm-12">
                     <h1>Home</h1>
                     <h4>Responsive Blog HTML CSS Website Template</h4>
-                    <a href="#blog" class="smoothScroll btn btn-default">Читать</a>
+                    <a href="#blog" class="btn btn-primary btn-lg" role="button">Читать</a>
                 </div>
             </div>
         </div>
@@ -30,7 +34,7 @@
                                 {% if pinned.image %}
                                     <div class="blog-post-image">
                                         <a href="{{ pinned.get_absolute_url }}">
-                                            <img src="{{ pinned.image.url }}" class="img-responsive" alt="Blog Image">
+                                            <img src="{{ pinned.image.url }}" class="img-responsive" alt="Blog Image" />
                                         </a>
                                     </div>
                                 {% endif %}
@@ -56,7 +60,7 @@
                             {% if post.image %}
                                 <div class="blog-post-image">
                                     <a href="{{ post.get_absolute_url }}">
-                                        <img src="{{ post.image.url }}" class="img-responsive" alt="Blog Image">
+                                        <img src="{{ post.image.url }}" class="img-responsive" alt="Blog Image" />
                                     </a>
                                 </div>
                             {% endif %}

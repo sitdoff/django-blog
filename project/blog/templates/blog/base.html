@@ -1,18 +1,21 @@
 {% load static %}
 {% load blog_tags %}
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-        <meta name="description" content="">
-        <meta name="keywords" content="">
-        <meta name="author" content="">
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta name="description" content="" />
+        <meta name="keywords" content="" />
+        <meta name="author" content="" />
         <meta name="viewport"
-              content="width=device-width, initial-scale=1, maximum-scale=1">
+              content="width=device-width, initial-scale=1, maximum-scale=1" />
         <title>
+
             {% block title %}
             {% endblock title %}
+
         </title>
         <!--
 Template 2085 Neuron
@@ -20,12 +23,12 @@ Template 2085 Neuron
 http://www.tooplate.com/view/2085-neuron
 
 -->
-        <link rel="stylesheet" href="{% static 'blog/css/bootstrap.min.css' %}">
-        <link rel="stylesheet" href="{% static 'blog/css/font-awesome.min.css' %}">
+        <link rel="stylesheet" href="{% static 'blog/css/bootstrap.min.css' %}" />
+        <link rel="stylesheet" href="{% static 'blog/css/font-awesome.min.css' %}" />
         <!-- Main css -->
-        <link rel="stylesheet" href="{% static "blog/css/style.css" %}">
+        <link rel="stylesheet" href="{% static "blog/css/style.css" %}" />
         <link href="https://fonts.googleapis.com/css?family=Lora|Merriweather:300,400"
-              rel="stylesheet">
+              rel="stylesheet" />
     </head>
     <body>
         <!-- PRE LOADER -->
@@ -35,8 +38,10 @@ http://www.tooplate.com/view/2085-neuron
             </div>
         </div>
         {% navigation user %}
+
         {% block content %}
         {% endblock content %}
+
         <!-- Footer Section -->
         <footer>
             <div class="container">
@@ -63,7 +68,7 @@ http://www.tooplate.com/view/2085-neuron
                         </p>
                     </div>
                     <div class="clearfix col-md-12 col-sm-12">
-                        <hr>
+                        <hr />
                     </div>
                     <div class="col-md-12 col-sm-12">
                         <ul class="social-icon">
