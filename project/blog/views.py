@@ -1,6 +1,8 @@
 from comments.forms import CommentForm
 from comments.models import Comment
+from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.messages.views import SuccessMessageMixin
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
@@ -181,8 +183,10 @@ def set_editor(request: HttpRequest) -> HttpResponseRedirect:
     if not post.editor:
         post.editor = request.user
         post.save()
+        messages.add_message(request, messages.SUCCESS, "Вы взяли пост на редактирование.")
         return HttpResponseRedirect(reverse_lazy("unpublished_post", kwargs={"post_slug": post.slug}))
     # TODO make message
+    messages.add_message(request, messages.ERROR, "У поста уже есть редактор.")
     return HttpResponseRedirect(reverse_lazy("unpublished_posts"))
 
 

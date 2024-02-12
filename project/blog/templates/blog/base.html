@@ -30,6 +30,7 @@ http://www.tooplate.com/view/2085-neuron
         <link href="https://fonts.googleapis.com/css?family=Lora|Merriweather:300,400"
               rel="stylesheet" />
     </head>
+
     <body>
         <!-- PRE LOADER -->
         <div class="preloader">
@@ -38,7 +39,7 @@ http://www.tooplate.com/view/2085-neuron
             </div>
         </div>
         {% navigation user %}
-
+        {% messages_tag %}
         {% block content %}
         {% endblock content %}
 
@@ -102,5 +103,6 @@ http://www.tooplate.com/view/2085-neuron
         <script src="{% static "blog/js/jquery.parallax.js" %}"></script>
         <script src="{% static "blog/js/smoothscroll.js" %}"></script>
         <script src="{% static "blog/js/custom.js" %}"></script>
+
     </body>
 </html>

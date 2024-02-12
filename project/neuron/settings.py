@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 
 import django_stubs_ext
+from django.contrib.messages import constants as messages
 from dotenv import load_dotenv
 
 django_stubs_ext.monkeypatch()
@@ -179,3 +180,12 @@ CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_TIMEZONE = "Europe/Moscow"
+
+# Message settings
+MESSAGE_TAGS = {
+    messages.INFO: "alert-info",
+    messages.SUCCESS: "alert-success",
+    messages.WARNING: "alert-warning",
+    messages.ERROR: "alert-danger",
+}
+MESSAGE_STORAGE = "django.contrib.messages.storage.fallback.FallbackStorage"
