@@ -20,7 +20,7 @@ class CreateTestUsersAndPostsMixin:
             "is_staff": True,
             "is_active": True,
         },
-        {"username": "admin", "email": "admin@test.com", "is_superuser": True, "is_active": True},
+        {"username": "admin", "email": "admin@test.com", "is_staff": True, "is_superuser": True, "is_active": True},
     ]
     posts = {
         "draft": {"title": "draft_post", "is_draft": True, "is_published": False},
@@ -66,3 +66,65 @@ class TestBlog(CreateTestUsersAndPostsMixin, TestCase):
             self.assertEqual(response.request["PATH_INFO"], self.pages[url_name]["url"])
             self.assertEqual(response.status_code, 200, f"\n\nUrl is {url}.\nStaus-code is {response.status_code}")
             print(f'Page "{url}" OK')
+
+
+class TestSetEditor(CreateTestUsersAndPostsMixin, TestCase):
+    """
+    Testing the editor assignment view.
+    """
+
+    def test_get_set_editor(self):
+        """
+        Sends a GET request to the set_editor view.
+        """
+        self.client.logout()
+        for user in self.test_users:
+            if user is not None:
+                self.client.force_login(user)
+            response = self.client.get(reverse("set_editor"))
+            if user is not None and user.is_staff:
+                self.assertEqual(response.status_code, 405)
+            else:
+                self.assertEqual(response.status_code, 302)
+                self.assertRedirects(response, expected_url=reverse("users:login") + "?next=/unpublished/set_editor")
+            self.client.logout()
+
+    def test_post_set_editor(self):
+        """
+        Sends a POST request to the set_editor view.
+        """
+        self.client.logout()
+        for user in self.test_users:
+            if user is not None:
+                self.client.force_login(user)
+            for post in self.test_posts:
+                self.assertEqual(post.editor, None)
+                response = self.client.post(reverse("set_editor"), data={"post_slug": post.slug})
+                post = Post.objects.get(slug=post.slug)
+                if user is not None and user.is_staff and not post.is_published:
+                    self.assertEqual(post.editor, user)
+                else:
+                    self.assertEqual(post.editor, None)
+                self.assertEqual(response.status_code, 302)
+                post.editor = None
+                post.save()
+            self.client.logout()
+
+    def test_set_editor_if_post_already_have_editor(self):
+        """
+        Testing the set_editror view if the post already has an editor.
+        """
+        editor_data = {"username": "editor", "email": "editor@mail.com", "is_staff": True, "is_active": True}
+        editor = CustomUser.objects.create(**editor_data)
+        post = Post.objects.get(slug="unpublished-post")
+        self.assertEqual(post.editor, None)
+        post.editor = editor
+        post.save()
+        self.client.logout()
+        for user in self.test_users:
+            if user is not None:
+                self.client.force_login(user)
+            self.client.get(reverse("set_editor"))
+            self.assertNotEqual(editor, user)
+            self.assertEqual(post.editor, editor)
+            self.client.logout()
