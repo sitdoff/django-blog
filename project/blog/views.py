@@ -173,14 +173,14 @@ class EditDraftPost(IsAuthorDraftRequiredMixin, TitleMixin, UpdateView):
     success_url = reverse_lazy("drafts")
 
 
-@user_passes_test(lambda user: user.is_staff)
+@user_passes_test(lambda user: user.is_staff, login_url=reverse_lazy("users:login"))
 @require_POST
 def set_editor(request: HttpRequest) -> HttpResponseRedirect:
     """
     Sets the editor for the post.
     """
     post: Post = get_object_or_404(Post, slug=request.POST["post_slug"])
-    if not post.editor:
+    if not post.editor and not post.is_published:
         post.editor = request.user
         post.save()
         messages.add_message(request, messages.SUCCESS, "Вы взяли пост на редактирование.")
