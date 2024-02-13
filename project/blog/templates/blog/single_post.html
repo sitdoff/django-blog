@@ -67,7 +67,7 @@
                             </div>
                             <div class="media-body">
                                 <h3 class="media-heading">
-                                    <a href="#">{{ post.author.first_name|default:post.author.username }}</a>
+                                    <a href="{{ post.author.get_absolute_url }}">{{ post.author.first_name|default:post.author.username }}</a>
                                 </h3>
                                 <p>{{ post.author.bio }}</p>
                             </div>
