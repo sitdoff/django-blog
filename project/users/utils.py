@@ -1,9 +1,8 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.signing import Signer
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
-
-from neuron.settings import ALLOWED_HOSTS
 
 # from .models import CustomUser
 
@@ -21,8 +20,8 @@ def user_directory_path(instance, filename: str) -> str:
 def send_activation_notification(user_id) -> None:
     """Generate mail and send to user's email"""
     user = get_object_or_404(get_user_model(), pk=user_id)
-    if ALLOWED_HOSTS:
-        host = "http://" + ALLOWED_HOSTS[0]
+    if settings.ALLOWED_HOSTS:
+        host = "http://" + settings.ALLOWED_HOSTS[0]
     else:
         host = "http://localhost:8000"
     context = {"user": user, "host": host, "sign": signer.sign(user.username)}
