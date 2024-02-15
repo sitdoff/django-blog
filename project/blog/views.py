@@ -172,6 +172,14 @@ class EditUnpublishedPost(IsStaffRequiredMixin, TitleMixin, UpdateView):
         kwargs["request"] = self.request
         return kwargs
 
+    def get_queryset(self):
+        """
+        Return a queryset with posts that are not draft or published.
+        """
+
+        queryset = self.model.objects.filter(is_draft=False).filter(is_published=False).select_related()
+        return queryset
+
 
 class EditDraftPost(IsAuthorDraftRequiredMixin, TitleMixin, UpdateView):
     """View for staff to edit a draft"""
