@@ -168,6 +168,9 @@ class EditUnpublishedPost(IsStaffRequiredMixin, TitleMixin, UpdateView):
         return reverse("unpublished_post", kwargs={"post_slug": self.object.slug})
 
     def get_form_kwargs(self):
+        """
+        Add a request to the form attributes.
+        """
         kwargs = super().get_form_kwargs()
         kwargs["request"] = self.request
         return kwargs
@@ -203,6 +206,7 @@ class EditDraftPost(IsAuthorDraftRequiredMixin, TitleMixin, UpdateView):
         queryset = Post.objects.filter(is_draft=True).filter(author=self.request.user).select_related()
         return queryset
 
+
 @user_passes_test(lambda user: user.is_staff, login_url=reverse_lazy("users:login"))
 @require_POST
 def set_editor(request: HttpRequest) -> HttpResponseRedirect:
@@ -215,7 +219,6 @@ def set_editor(request: HttpRequest) -> HttpResponseRedirect:
         post.save()
         messages.add_message(request, messages.SUCCESS, "Вы взяли пост на редактирование.")
         return HttpResponseRedirect(reverse_lazy("unpublished_post", kwargs={"post_slug": post.slug}))
-    # TODO make message
     messages.add_message(request, messages.ERROR, "У поста уже есть редактор.")
     return HttpResponseRedirect(reverse_lazy("unpublished_posts"))
 
