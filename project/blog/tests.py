@@ -68,6 +68,211 @@ class TestBlog(CreateTestUsersAndPostsMixin, TestCase):
             print(f'Page "{url}" OK')
 
 
+class TestEditUnpublishedPostViews(CreateTestUsersAndPostsMixin, TestCase):
+    """
+    EditUnpublishedPost View tests.
+    """
+
+    def access_test_with_all_users(
+        self,
+        post_slug,
+        none_user_status_code,
+        user_status_code,
+        author_status_code,
+        staff_status_code,
+        authorstaff_status_code,
+        admin_status_code,
+    ):
+        post = Post.objects.get(slug=post_slug)
+
+        self.client.logout()
+
+        for user in self.test_users:
+            if user is not None:
+                self.client.force_login(user)
+            response = self.client.get(reverse("edit_post", kwargs={"post_slug": post.slug}))
+            if user is None:
+                self.assertEqual(response.status_code, none_user_status_code)
+                self.assertRedirects(
+                    response, expected_url=reverse("users:login") + f"?next=/unpublished/edit/{post.slug}"
+                )
+            elif not user.is_author and not user.is_staff:
+                self.assertEqual(response.status_code, user_status_code)
+            elif user.is_author and user.is_staff:
+                self.assertEqual(response.status_code, authorstaff_status_code)
+            elif user.is_author:
+                self.assertEqual(response.status_code, author_status_code)
+            elif user.is_staff:
+                self.assertEqual(response.status_code, staff_status_code)
+            elif user.is_superuser:
+                self.assertEqual(response.status_code, admin_status_code)
+            self.client.logout()
+
+    def test_access_unpublished_post(self):
+        """
+        Testing with an unpublished post.
+        """
+        test_data = {
+            "post_slug": "unpublished-post",
+            "none_user_status_code": 302,
+            "user_status_code": 403,
+            "author_status_code": 403,
+            "staff_status_code": 200,
+            "authorstaff_status_code": 200,
+            "admin_status_code": 200,
+        }
+        self.access_test_with_all_users(**test_data)
+
+    def test_access_draft(self):
+        """
+        Testing with a draft.
+        """
+        test_data = {
+            "post_slug": "draft-post",
+            "none_user_status_code": 302,
+            "user_status_code": 403,
+            "author_status_code": 403,
+            "staff_status_code": 404,
+            "authorstaff_status_code": 404,
+            "admin_status_code": 404,
+        }
+        self.access_test_with_all_users(**test_data)
+
+    def test_access_published_post(self):
+        """
+        Testing with a published post.
+        """
+        test_data = {
+            "post_slug": "published-post",
+            "none_user_status_code": 302,
+            "user_status_code": 403,
+            "author_status_code": 403,
+            "staff_status_code": 404,
+            "authorstaff_status_code": 404,
+            "admin_status_code": 404,
+        }
+        self.access_test_with_all_users(**test_data)
+
+    def test_edit_unpublished_post_view(self):
+        """
+        Tests editing an unpublished post.
+        """
+        user = CustomUser.objects.get(username="staff")
+        old_post = Post.objects.get(slug="unpublished-post")
+        self.assertEqual(old_post.title, "unpublished_post")
+        self.assertEqual(old_post.is_draft, False)
+        self.assertEqual(old_post.is_published, False)
+
+        self.client.force_login(user)
+        response = self.client.get(reverse("edit_post", kwargs={"post_slug": old_post.slug}))
+        self.assertEqual(response.status_code, 200)
+
+        form_data = {
+            "title": "edited_post",
+            "epigraph": "edited_post",
+            "article": "edited_post",
+            "image": "",
+            "status": "is_unpublished",
+        }
+        response = self.client.post(reverse("edit_post", kwargs={"post_slug": old_post.slug}), data=form_data)
+        updated_post = Post.objects.get(pk=old_post.pk)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("unpublished_post", kwargs={"post_slug": updated_post.slug}))
+        self.assertNotEqual(updated_post.title, old_post.title)
+        self.assertEqual(updated_post.title, "edited_post")
+        self.assertEqual(updated_post.epigraph, "edited_post")
+        self.assertEqual(updated_post.article, "edited_post")
+        self.assertEqual(updated_post.is_draft, False)
+        self.assertEqual(updated_post.is_published, False)
+
+    def test_return_unpublished_post_to_draft(self):
+        """
+        Tests returning an unpublished post to the author's draft.
+        """
+        staff = CustomUser.objects.get(username="staff")
+        author = CustomUser.objects.get(username="author")
+        old_post = Post.objects.get(slug="unpublished-post")
+        self.assertEqual(old_post.title, "unpublished_post")
+        self.assertEqual(old_post.is_draft, False)
+        self.assertEqual(old_post.is_published, False)
+
+        self.client.force_login(staff)
+        response = self.client.get(reverse("edit_post", kwargs={"post_slug": old_post.slug}))
+        self.assertEqual(response.status_code, 200)
+
+        self.client.force_login(author)
+        response = self.client.get(reverse("edit_draft", kwargs={"post_slug": old_post.slug}))
+        self.assertEqual(response.status_code, 404)
+
+        self.client.force_login(staff)
+
+        form_data = {
+            "title": "edited_post",
+            "epigraph": "edited_post",
+            "article": "edited_post",
+            "image": "",
+            "status": "is_draft",
+        }
+        response = self.client.post(reverse("edit_post", kwargs={"post_slug": old_post.slug}), data=form_data)
+        updated_post = Post.objects.get(pk=old_post.pk)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("unpublished_posts"))
+        self.assertNotEqual(updated_post.title, old_post.title)
+        self.assertEqual(updated_post.title, "edited_post")
+        self.assertEqual(updated_post.epigraph, "edited_post")
+        self.assertEqual(updated_post.article, "edited_post")
+        self.assertEqual(updated_post.is_draft, True)
+        self.assertEqual(updated_post.is_published, False)
+
+        response = self.client.get(reverse("edit_post", kwargs={"post_slug": old_post.slug}))
+        self.assertEqual(response.status_code, 404)
+        response = self.client.get(reverse("edit_post", kwargs={"post_slug": updated_post.slug}))
+        self.assertEqual(response.status_code, 404)
+
+        self.client.force_login(author)
+        response = self.client.get(reverse("edit_post", kwargs={"post_slug": old_post.slug}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse("edit_draft", kwargs={"post_slug": updated_post.slug}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_publishing_post(self):
+        """
+        Tests publishing an unpublished post.
+        """
+        user = CustomUser.objects.get(username="staff")
+        old_post = Post.objects.get(slug="unpublished-post")
+        self.assertEqual(old_post.title, "unpublished_post")
+        self.assertEqual(old_post.is_draft, False)
+        self.assertEqual(old_post.is_published, False)
+
+        self.client.force_login(user)
+        response = self.client.get(reverse("edit_post", kwargs={"post_slug": old_post.slug}))
+        self.assertEqual(response.status_code, 200)
+
+        form_data = {
+            "title": "edited_post",
+            "epigraph": "edited_post",
+            "article": "edited_post",
+            "image": "",
+            "status": "is_published",
+        }
+        response = self.client.post(reverse("edit_post", kwargs={"post_slug": old_post.slug}), data=form_data)
+        updated_post = Post.objects.get(pk=old_post.pk)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("unpublished_posts"))
+        self.assertNotEqual(updated_post.title, old_post.title)
+        self.assertEqual(updated_post.title, "edited_post")
+        self.assertEqual(updated_post.epigraph, "edited_post")
+        self.assertEqual(updated_post.article, "edited_post")
+        self.assertEqual(updated_post.is_draft, False)
+        self.assertEqual(updated_post.is_published, True)
+
+        response = self.client.get(reverse("edit_post", kwargs={"post_slug": old_post.slug}))
+        self.assertEqual(response.status_code, 404)
+        response = self.client.get(reverse("edit_post", kwargs={"post_slug": updated_post.slug}))
+        self.assertEqual(response.status_code, 404)
+
+
 class TestSetEditor(CreateTestUsersAndPostsMixin, TestCase):
     """
     Testing the editor assignment view.
