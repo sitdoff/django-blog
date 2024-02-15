@@ -191,6 +191,17 @@ class EditDraftPost(IsAuthorDraftRequiredMixin, TitleMixin, UpdateView):
     slug_url_kwarg = "post_slug"
     success_url = reverse_lazy("drafts")
 
+    def get_queryset(self):
+        """
+        Returns a queryset with posts that are drafts and owned by the current user.
+
+        The superuser can see all drafts.
+        """
+        if self.request.user.is_superuser:
+            queryset = Post.objects.filter(is_draft=True).select_related()
+            return queryset
+        queryset = Post.objects.filter(is_draft=True).filter(author=self.request.user).select_related()
+        return queryset
 
 @user_passes_test(lambda user: user.is_staff, login_url=reverse_lazy("users:login"))
 @require_POST
