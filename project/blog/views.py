@@ -159,11 +159,13 @@ class EditUnpublishedPost(IsStaffRequiredMixin, TitleMixin, UpdateView):
     slug_url_kwarg = "post_slug"
 
     def get_success_url(self):
-        return (
-            reverse_lazy("unpublished_post", kwargs={"post_slug": self.object.slug})
-            if self.queryset
-            else reverse("unpublished_posts")
-        )
+        """
+        Return a redirect to view the post being edited, if available,
+        otherwise returns a redirect to the list of unpublished posts.
+        """
+        if self.object.is_draft or self.object.is_published:
+            return reverse("unpublished_posts")
+        return reverse("unpublished_post", kwargs={"post_slug": self.object.slug})
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
