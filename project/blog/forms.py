@@ -38,18 +38,21 @@ class EditStaffPostForm(AddPostForm):
         self.request = kwargs.pop("request", None)
         super().__init__(*args, **kwargs)
 
-    def save(self, commit=False):
+    def save(self, commit=True):
+        """
+        Sets the post status depending on the value passed from the form.
+        """
         instance: Post = super().save(commit=False)
         if self.cleaned_data["status"] == "is_draft":
             instance.is_draft = True
-            instance.save()
             messages.info(self.request, "Вы отправили пост обратно автору")
             send_mail_your_post_has_been_returned_task.delay(instance.id)
         if self.cleaned_data["status"] == "is_published":
             instance.is_published = True
-            instance.save()
             messages.info(self.request, "Вы опубликовали пост")
             send_mail_your_post_has_been_published_task.delay(instance.id)
+        if commit:
+            instance.save()
         return instance
 
     class Meta(AddPostForm.Meta):
