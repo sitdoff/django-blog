@@ -15,5 +15,5 @@ urlpatterns = [
     path("unpublished", views.UnpublishedPostsView.as_view(), name="unpublished_posts"),
     path("unpublished/set_editor", views.set_editor, name="set_editor"),
     path("unpublished/<slug:post_slug>", views.UnpublishedPostDetailView.as_view(), name="unpublished_post"),
-    path("unpublish/edit/<slug:post_slug>", views.EditUnpublishedPost.as_view(), name="edit_post"),
+    path("unpublished/edit/<slug:post_slug>", views.EditUnpublishedPost.as_view(), name="edit_post"),
 ]
