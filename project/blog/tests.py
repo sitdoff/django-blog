@@ -1,7 +1,14 @@
 from blog.models import Post
+from django.core import mail
 from django.shortcuts import reverse
+from django.template.loader import render_to_string
 from django.test import TestCase
 from users.models import CustomUser
+
+from .utils import (
+    send_mail_your_post_has_been_published,
+    send_mail_your_post_has_been_returned,
+)
 
 # Create your tests here.
 
@@ -333,3 +340,37 @@ class TestSetEditor(CreateTestUsersAndPostsMixin, TestCase):
             self.assertNotEqual(editor, user)
             self.assertEqual(post.editor, editor)
             self.client.logout()
+
+
+class TestSendingLetterToAurhor(CreateTestUsersAndPostsMixin, TestCase):
+    """
+    Testing sending emails to the author when the editor changes the status of his post.
+    """
+
+    def test_send_mail_your_post_has_been_returned(self):
+        """
+        Testing the function of sending a letter to the author
+        when his post is returned to drafts.
+        """
+        post = Post.objects.get(slug="unpublished-post")
+        context = {"post": post, "author": post.author}
+        subject = render_to_string("blog/email/your_post_has_been_returned_subject.txt", context)
+        body_text = render_to_string("blog/email/your_post_has_been_returned_body.txt", context)
+        send_mail_your_post_has_been_returned(post.pk)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].subject, subject.strip())
+        self.assertEqual(mail.outbox[0].body, body_text)
+
+    def test_send_mail_your_post_has_been_published(self):
+        """
+        Tests the function of sending a letter to the author
+        when his post is published.
+        """
+        post = Post.objects.get(slug="unpublished-post")
+        context = {"post": post, "author": post.author}
+        subject = render_to_string("blog/email/your_post_has_been_published_subject.txt", context)
+        body_text = render_to_string("blog/email/your_post_has_been_published_body.txt", context)
+        send_mail_your_post_has_been_published(post.pk)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].subject, subject.strip())
+        self.assertEqual(mail.outbox[0].body, body_text)
