@@ -1,9 +1,13 @@
 {% extends "blog/base.html" %}
+
 {% load blog_tags %}
+
 {% load users_tags %}
+
 {% block title %}
     {{ title }}
 {% endblock title %}
+
 {% block content %}
     <!-- Home Section -->
     <!-- Blog Section -->
@@ -16,7 +20,7 @@
                             {% if post.image %}
                                 <div class="blog-post-image">
                                     <a href="{{ post.get_absolute_url }}">
-                                        <img src="{{ post.image.url }}" class="img-responsive" alt="Blog Image">
+                                        <img src="{{ post.image.url }}" class="img-responsive" alt="Blog Image" />
                                     </a>
                                 </div>
                             {% endif %}
@@ -38,7 +42,7 @@
                             <div class="blog-post-des">
                                 <p>{{ post.article|safe|truncatewords:100 }}</p>
                                 <a href="{{ post.get_absolute_url }}" class="btn btn-default">Читать</a>
-                                <a href="{% url 'edit_post' post.slug %}" class="btn btn-default">Edit</a>
+                                <a href="{% url 'edit_draft' post.slug %}" class="btn btn-default">Edit</a>
                             </div>
                         </div>
                     {% endfor %}
