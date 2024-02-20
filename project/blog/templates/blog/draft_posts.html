@@ -19,7 +19,7 @@
                         <div class="blog-post-thumb">
                             {% if post.image %}
                                 <div class="blog-post-image">
-                                    <a href="{{ post.get_absolute_url }}">
+                                    <a href="{% url 'draft' post.slug %}">
                                         <img src="{{ post.image.url }}" class="img-responsive" alt="Blog Image" />
                                     </a>
                                 </div>
@@ -31,7 +31,7 @@
                                     {% elif not post.is_published %}
                                         <span style="color: red">[UNPUBLISHED]</span>
                                     {% endif %}
-                                    <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+                                    <a href="{% url 'draft' post.slug %}">{{ post.title }}</a>
                                 </h3>
                             </div>
                             <div class="blog-post-format">
@@ -41,7 +41,7 @@
                             </div>
                             <div class="blog-post-des">
                                 <p>{{ post.article|safe|truncatewords:100 }}</p>
-                                <a href="{{ post.get_absolute_url }}" class="btn btn-default">Читать</a>
+                                <a href="{% url 'draft' post.slug %}" class="btn btn-default">Читать</a>
                                 <a href="{% url 'edit_draft' post.slug %}" class="btn btn-default">Edit</a>
                             </div>
                         </div>
