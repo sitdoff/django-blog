@@ -63,7 +63,7 @@ class DraftPostsView(IsAuthorRequiredMixin, TitleMixin, ListView):
 
     title = "Черновики"
     model = Post
-    template_name = "blog/unpublished_posts.html"
+    template_name = "blog/draft_posts.html"
     paginate_by = 5
     context_object_name = "posts"
 
