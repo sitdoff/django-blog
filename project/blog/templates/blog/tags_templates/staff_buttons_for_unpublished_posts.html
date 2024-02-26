@@ -5,7 +5,8 @@
             <input type="hidden" name="post_slug" value="{{ post.slug }}" />
             <button type="submit" class="btn btn-danger">Взять на редактирование</button>
         {% elif post.editor == request.user %}
-            <a href="{% url 'edit_post' post.slug %}" class="btn btn-danger">Редактировать пост</a>
+            <a href="{% url 'edit_unpublished_post' post.slug %}"
+               class="btn btn-danger">Редактировать пост</a>
         {% endif %}
         {% csrf_token %}
     </form>

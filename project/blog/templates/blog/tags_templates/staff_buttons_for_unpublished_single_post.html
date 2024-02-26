@@ -8,6 +8,7 @@
         </form>
     {% endif %}
     {% if post.editor == request.user %}
-        <a href="{% url 'edit_post' post.slug %}" class="btn btn-danger">Редактировать пост</a>
+        <a href="{% url 'edit_unpublished_post' post.slug %}"
+           class="btn btn-danger">Редактировать пост</a>
     {% endif %}
 {% endif %}

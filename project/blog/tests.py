@@ -253,7 +253,7 @@ class TestEditUnpublishedPostViews(CreateTestUsersAndPostsMixin, TestCase):
         for user in self.test_users:
             if user is not None:
                 self.client.force_login(user)
-            response = self.client.get(reverse("edit_post", kwargs={"post_slug": post.slug}))
+            response = self.client.get(reverse("edit_unpublished_post", kwargs={"post_slug": post.slug}))
             if user is None:
                 self.assertEqual(response.status_code, none_user_status_code)
                 self.assertRedirects(
@@ -327,7 +327,7 @@ class TestEditUnpublishedPostViews(CreateTestUsersAndPostsMixin, TestCase):
         self.assertEqual(old_post.is_published, False)
 
         self.client.force_login(user)
-        response = self.client.get(reverse("edit_post", kwargs={"post_slug": old_post.slug}))
+        response = self.client.get(reverse("edit_unpublished_post", kwargs={"post_slug": old_post.slug}))
         self.assertEqual(response.status_code, 200)
 
         form_data = {
@@ -337,7 +337,9 @@ class TestEditUnpublishedPostViews(CreateTestUsersAndPostsMixin, TestCase):
             "image": "",
             "status": "is_unpublished",
         }
-        response = self.client.post(reverse("edit_post", kwargs={"post_slug": old_post.slug}), data=form_data)
+        response = self.client.post(
+            reverse("edit_unpublished_post", kwargs={"post_slug": old_post.slug}), data=form_data
+        )
         updated_post = Post.objects.get(pk=old_post.pk)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("unpublished_post", kwargs={"post_slug": updated_post.slug}))
@@ -360,7 +362,7 @@ class TestEditUnpublishedPostViews(CreateTestUsersAndPostsMixin, TestCase):
         self.assertEqual(old_post.is_published, False)
 
         self.client.force_login(staff)
-        response = self.client.get(reverse("edit_post", kwargs={"post_slug": old_post.slug}))
+        response = self.client.get(reverse("edit_unpublished_post", kwargs={"post_slug": old_post.slug}))
         self.assertEqual(response.status_code, 200)
 
         self.client.force_login(author)
@@ -376,7 +378,9 @@ class TestEditUnpublishedPostViews(CreateTestUsersAndPostsMixin, TestCase):
             "image": "",
             "status": "is_draft",
         }
-        response = self.client.post(reverse("edit_post", kwargs={"post_slug": old_post.slug}), data=form_data)
+        response = self.client.post(
+            reverse("edit_unpublished_post", kwargs={"post_slug": old_post.slug}), data=form_data
+        )
         updated_post = Post.objects.get(pk=old_post.pk)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("unpublished_posts"))
@@ -387,13 +391,13 @@ class TestEditUnpublishedPostViews(CreateTestUsersAndPostsMixin, TestCase):
         self.assertEqual(updated_post.is_draft, True)
         self.assertEqual(updated_post.is_published, False)
 
-        response = self.client.get(reverse("edit_post", kwargs={"post_slug": old_post.slug}))
+        response = self.client.get(reverse("edit_unpublished_post", kwargs={"post_slug": old_post.slug}))
         self.assertEqual(response.status_code, 404)
-        response = self.client.get(reverse("edit_post", kwargs={"post_slug": updated_post.slug}))
+        response = self.client.get(reverse("edit_unpublished_post", kwargs={"post_slug": updated_post.slug}))
         self.assertEqual(response.status_code, 404)
 
         self.client.force_login(author)
-        response = self.client.get(reverse("edit_post", kwargs={"post_slug": old_post.slug}))
+        response = self.client.get(reverse("edit_unpublished_post", kwargs={"post_slug": old_post.slug}))
         self.assertEqual(response.status_code, 403)
         response = self.client.get(reverse("edit_draft", kwargs={"post_slug": updated_post.slug}))
         self.assertEqual(response.status_code, 200)
@@ -409,7 +413,7 @@ class TestEditUnpublishedPostViews(CreateTestUsersAndPostsMixin, TestCase):
         self.assertEqual(old_post.is_published, False)
 
         self.client.force_login(user)
-        response = self.client.get(reverse("edit_post", kwargs={"post_slug": old_post.slug}))
+        response = self.client.get(reverse("edit_unpublished_post", kwargs={"post_slug": old_post.slug}))
         self.assertEqual(response.status_code, 200)
 
         form_data = {
@@ -419,7 +423,9 @@ class TestEditUnpublishedPostViews(CreateTestUsersAndPostsMixin, TestCase):
             "image": "",
             "status": "is_published",
         }
-        response = self.client.post(reverse("edit_post", kwargs={"post_slug": old_post.slug}), data=form_data)
+        response = self.client.post(
+            reverse("edit_unpublished_post", kwargs={"post_slug": old_post.slug}), data=form_data
+        )
         updated_post = Post.objects.get(pk=old_post.pk)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("unpublished_posts"))
@@ -430,9 +436,9 @@ class TestEditUnpublishedPostViews(CreateTestUsersAndPostsMixin, TestCase):
         self.assertEqual(updated_post.is_draft, False)
         self.assertEqual(updated_post.is_published, True)
 
-        response = self.client.get(reverse("edit_post", kwargs={"post_slug": old_post.slug}))
+        response = self.client.get(reverse("edit_unpublished_post", kwargs={"post_slug": old_post.slug}))
         self.assertEqual(response.status_code, 404)
-        response = self.client.get(reverse("edit_post", kwargs={"post_slug": updated_post.slug}))
+        response = self.client.get(reverse("edit_unpublished_post", kwargs={"post_slug": updated_post.slug}))
         self.assertEqual(response.status_code, 404)
 
 
