@@ -3,6 +3,7 @@ from django.core import mail
 from django.shortcuts import reverse
 from django.template.loader import render_to_string
 from django.test import TestCase
+from slugify import slugify
 from users.models import CustomUser
 
 from .utils import (
@@ -73,6 +74,161 @@ class TestBlog(CreateTestUsersAndPostsMixin, TestCase):
             self.assertEqual(response.request["PATH_INFO"], self.pages[url_name]["url"])
             self.assertEqual(response.status_code, 200, f"\n\nUrl is {url}.\nStaus-code is {response.status_code}")
             print(f'Page "{url}" OK')
+
+
+class TestAddPostView(TestCase):
+    """
+    Add post view tests
+    """
+
+    def test_add_post_as_draft(self):
+        """
+        Add post as draft test
+        """
+        user_data = {"username": "author", "email": "author@test.com", "is_author": True, "is_active": True}
+        author = CustomUser.objects.create(**user_data)
+        is_post = Post.objects.filter(author=author, slug="draft-post").exists()
+        self.assertEqual(is_post, False)
+
+        self.client.force_login(author)
+        response = self.client.get(reverse("add_post"))
+        self.assertEqual(response.status_code, 200)
+
+        form_data = {
+            "title": "draft_post",
+            "epigraph": "draft_post",
+            "article": "draft_post",
+            "image": "",
+            "status": "is_draft",
+        }
+
+        response = self.client.post(reverse("add_post"), data=form_data)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("drafts"))
+        is_post = Post.objects.filter(author=author, slug="draft-post").exists()
+        self.assertEqual(is_post, True)
+
+        post = Post.objects.get(slug="draft-post")
+        self.assertEqual(post.title, form_data["title"])
+        self.assertEqual(post.slug, slugify(form_data["title"]))
+        self.assertEqual(post.epigraph, form_data["epigraph"])
+        self.assertEqual(post.article, form_data["article"])
+        self.assertEqual(post.author, author)
+        self.assertEqual(post.is_draft, True)
+        self.assertEqual(post.is_published, False)
+
+    def test_add_post_as_unpublished(self):
+        """
+        Add post as unpublished post test
+        """
+        user_data = {"username": "author", "email": "author@test.com", "is_author": True, "is_active": True}
+        author = CustomUser.objects.create(**user_data)
+        is_post = Post.objects.filter(author=author, slug="draft-post").exists()
+        self.assertEqual(is_post, False)
+
+        self.client.force_login(author)
+        response = self.client.get(reverse("add_post"))
+        self.assertEqual(response.status_code, 200)
+
+        form_data = {
+            "title": "unpublished_post",
+            "epigraph": "unpublished_post",
+            "article": "unpublished_post",
+            "image": "",
+            "status": "is_unpublished",
+        }
+
+        response = self.client.post(reverse("add_post"), data=form_data)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("drafts"))
+        is_post = Post.objects.filter(author=author, slug="unpublished-post").exists()
+        self.assertEqual(is_post, True)
+
+        post = Post.objects.get(slug="unpublished-post")
+        self.assertEqual(post.title, form_data["title"])
+        self.assertEqual(post.slug, slugify(form_data["title"]))
+        self.assertEqual(post.epigraph, form_data["epigraph"])
+        self.assertEqual(post.article, form_data["article"])
+        self.assertEqual(post.author, author)
+        self.assertEqual(post.is_draft, False)
+        self.assertEqual(post.is_published, False)
+
+
+class TestEditDraftPostView(CreateTestUsersAndPostsMixin, TestCase):
+
+    def test_edit_draft_as_draft(self):
+        """
+        Testing draft editing. The status of the post remains draft.
+        """
+        author = CustomUser.objects.get(username="author")
+        old_post = Post.objects.get(slug="draft-post")
+        self.assertEqual(old_post.author, author)
+        self.assertEqual(old_post.title, self.posts["draft"]["title"])
+        self.assertEqual(old_post.slug, slugify(self.posts["draft"]["title"]))
+        self.assertEqual(old_post.is_draft, self.posts["draft"]["is_draft"])
+        self.assertEqual(old_post.is_published, self.posts["draft"]["is_published"])
+
+        self.client.force_login(author)
+        response = self.client.get(reverse("edit_draft", kwargs={"post_slug": old_post.slug}))
+        self.assertEqual(response.status_code, 200)
+
+        form_data = {
+            "title": "edited_draft_post",
+            "epigraph": "edited_draft_post",
+            "article": "edited_draft_post",
+            "image": "",
+            "status": "is_draft",
+        }
+        response = self.client.post(reverse("edit_draft", kwargs={"post_slug": old_post.slug}), data=form_data)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("drafts"))
+
+        edited_post = Post.objects.get(slug=slugify(form_data["title"]))
+        self.assertEqual(old_post.pk, edited_post.pk)
+        self.assertEqual(edited_post.title, form_data["title"])
+        self.assertEqual(edited_post.slug, slugify(form_data["title"]))
+        self.assertEqual(edited_post.epigraph, form_data["epigraph"])
+        self.assertEqual(edited_post.article, form_data["article"])
+        self.assertEqual(edited_post.author, author)
+        self.assertEqual(edited_post.is_draft, True)
+        self.assertEqual(edited_post.is_published, False)
+
+    def test_edit_draft_as_unpublished_post(self):
+        """
+        Testing draft editing. The post status becomes "unpublished".
+        """
+        author = CustomUser.objects.get(username="author")
+        old_post = Post.objects.get(slug="draft-post")
+        self.assertEqual(old_post.author, author)
+        self.assertEqual(old_post.title, self.posts["draft"]["title"])
+        self.assertEqual(old_post.slug, slugify(self.posts["draft"]["title"]))
+        self.assertEqual(old_post.is_draft, self.posts["draft"]["is_draft"])
+        self.assertEqual(old_post.is_published, self.posts["draft"]["is_published"])
+
+        self.client.force_login(author)
+        response = self.client.get(reverse("edit_draft", kwargs={"post_slug": old_post.slug}))
+        self.assertEqual(response.status_code, 200)
+
+        form_data = {
+            "title": "edited_draft_post",
+            "epigraph": "edited_draft_post",
+            "article": "edited_draft_post",
+            "image": "",
+            "status": "is_unpublished",
+        }
+        response = self.client.post(reverse("edit_draft", kwargs={"post_slug": old_post.slug}), data=form_data)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("drafts"))
+
+        edited_post = Post.objects.get(slug=slugify(form_data["title"]))
+        self.assertEqual(old_post.pk, edited_post.pk)
+        self.assertEqual(edited_post.title, form_data["title"])
+        self.assertEqual(edited_post.slug, slugify(form_data["title"]))
+        self.assertEqual(edited_post.epigraph, form_data["epigraph"])
+        self.assertEqual(edited_post.article, form_data["article"])
+        self.assertEqual(edited_post.author, author)
+        self.assertEqual(edited_post.is_draft, False)
+        self.assertEqual(edited_post.is_published, False)
 
 
 class TestEditUnpublishedPostViews(CreateTestUsersAndPostsMixin, TestCase):

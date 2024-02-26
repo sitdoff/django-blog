@@ -141,12 +141,13 @@ class AddPost(IsAuthorRequiredMixin, TitleMixin, CreateView):
     template_name = "blog/addpost.html"
     success_url = reverse_lazy("drafts")
 
-    def form_valid(self, form):
-        """Add current user as author in post object"""
-        self.instanse = form.save(commit=False)
-        self.instanse.author = self.request.user
-        self.instanse.save()
-        return super().form_valid(form)
+    def get_form_kwargs(self):
+        """
+        Add a request to the form attributes.
+        """
+        kwargs = super().get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
 
 
 class EditUnpublishedPost(IsStaffRequiredMixin, TitleMixin, UpdateView):
@@ -205,6 +206,14 @@ class EditDraftPost(IsAuthorDraftRequiredMixin, TitleMixin, UpdateView):
             return queryset
         queryset = Post.objects.filter(is_draft=True).filter(author=self.request.user).select_related()
         return queryset
+
+    def get_form_kwargs(self):
+        """
+        Add a request to the form attributes.
+        """
+        kwargs = super().get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
 
 
 @user_passes_test(lambda user: user.is_staff, login_url=reverse_lazy("users:login"))
