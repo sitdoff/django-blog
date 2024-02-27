@@ -6,6 +6,7 @@ from .tasks import (
     send_mail_your_post_has_been_published_task,
     send_mail_your_post_has_been_returned_task,
 )
+from .validators import validate_unique_title
 
 
 class AddPostForm(forms.ModelForm):
@@ -19,9 +20,32 @@ class AddPostForm(forms.ModelForm):
 
     status = forms.ChoiceField(choices=STATUS_CHOICES)
 
+    class Meta:
+        """Metadata"""
+
+        model = Post
+        fields = ("title", "epigraph", "article", "image")
+        widgets = {
+            "title": forms.TextInput(attrs={"class": "form-control"}),
+            "epigraph": forms.TextInput(attrs={"class": "form-control"}),
+            "article": forms.Textarea(attrs={"class": "form-control"}),
+        }
+
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request", None)
         super().__init__(*args, **kwargs)
+
+    def clean_title(self):
+        """
+        Validate title and slug field
+        """
+        field_value = self.cleaned_data.get("title")
+        if self.instance.pk is not None:
+            if self.instance.title != self.cleaned_data.get("title"):
+                validate_unique_title(field_value)
+        else:
+            validate_unique_title(field_value)
+        return field_value
 
     def save(self, commit=True):
         """
@@ -46,17 +70,6 @@ class AddPostForm(forms.ModelForm):
                 instance.save()
 
         return instance
-
-    class Meta:
-        """Metadata"""
-
-        model = Post
-        fields = ("title", "epigraph", "article", "image")
-        widgets = {
-            "title": forms.TextInput(attrs={"class": "form-control"}),
-            "epigraph": forms.TextInput(attrs={"class": "form-control"}),
-            "article": forms.Textarea(attrs={"class": "form-control"}),
-        }
 
 
 class EditStaffPostForm(forms.ModelForm):

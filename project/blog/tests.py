@@ -230,6 +230,26 @@ class TestEditDraftPostView(CreateTestUsersAndPostsMixin, TestCase):
         self.assertEqual(edited_post.is_draft, False)
         self.assertEqual(edited_post.is_published, False)
 
+    def test_change_status_exitst_draft(self):
+        post = Post.objects.get(slug="draft-post")
+        user = CustomUser.objects.get(username="author")
+        self.client.force_login(user)
+
+        form_data = {
+            "title": "draft_post",
+            "epigraph": "draft_post",
+            "article": "draft_post",
+            "image": "",
+            "status": "is_unpublished",
+        }
+        response = self.client.post(reverse("edit_draft", kwargs={"post_slug": "draft-post"}), data=form_data)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("drafts"))
+
+        post = Post.objects.get(slug="draft-post")
+        self.assertEqual(post.is_draft, False)
+        self.assertEqual(post.is_published, False)
+
     def test_delete_draft(self):
         """
         Test draft deletion.
@@ -244,9 +264,9 @@ class TestEditDraftPostView(CreateTestUsersAndPostsMixin, TestCase):
         #     "status": "delete_draft",
         # }
         form_data = {
-            "title": "edited_draft_post",
-            "epigraph": "edited_draft_post",
-            "article": "edited_draft_post",
+            "title": "draft_post",
+            "epigraph": "draft_post",
+            "article": "draft_post",
             "image": "",
             "status": "delete_draft",
         }
