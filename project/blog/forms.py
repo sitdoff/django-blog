@@ -14,6 +14,7 @@ class AddPostForm(forms.ModelForm):
     STATUS_CHOICES = (
         ("is_draft", "Черновик"),
         ("is_unpublished", "Опубликовать"),
+        ("delete_draft", "Удалить черновик"),
     )
 
     status = forms.ChoiceField(choices=STATUS_CHOICES)
@@ -38,7 +39,11 @@ class AddPostForm(forms.ModelForm):
             messages.info(self.request, "Ваш пост отправлен на публикацию")
 
         if commit:
-            instance.save()
+            if self.cleaned_data["status"] == "delete_draft":
+                instance.delete()
+                messages.warning(self.request, "Вы удалили черновик")
+            else:
+                instance.save()
 
         return instance
 

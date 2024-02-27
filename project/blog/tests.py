@@ -230,6 +230,33 @@ class TestEditDraftPostView(CreateTestUsersAndPostsMixin, TestCase):
         self.assertEqual(edited_post.is_draft, False)
         self.assertEqual(edited_post.is_published, False)
 
+    def test_delete_draft(self):
+        """
+        Test draft deletion.
+        """
+        user = CustomUser.objects.get(username="author")
+        self.client.force_login(user)
+
+        is_exist = Post.objects.filter(slug="draft-post").exists()
+        self.assertEqual(is_exist, True)
+
+        # form_data = {
+        #     "status": "delete_draft",
+        # }
+        form_data = {
+            "title": "edited_draft_post",
+            "epigraph": "edited_draft_post",
+            "article": "edited_draft_post",
+            "image": "",
+            "status": "delete_draft",
+        }
+        response = self.client.post(reverse("edit_draft", kwargs={"post_slug": "draft-post"}), data=form_data)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("drafts"))
+
+        is_exist = Post.objects.filter(slug="draft-post").exists()
+        self.assertEqual(is_exist, False)
+
 
 class TestEditUnpublishedPostViews(CreateTestUsersAndPostsMixin, TestCase):
     """
