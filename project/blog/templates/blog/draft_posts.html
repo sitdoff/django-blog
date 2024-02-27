@@ -43,6 +43,15 @@
                             </div>
                             {% author_buttons_for_drafts %}
                         </div>
+                    {% empty %}
+                        <div class="container" align="center">
+                            <div class="blog-comment-form">
+                                <h2>У вас нет черновиков</h2>
+                                <p>
+                                    <a href="{% url 'add_post' %}">Желаете добавить?</a>
+                                </p>
+                            </div>
+                        </div>
                     {% endfor %}
                     <!-- Блок пагинации -->
                     {% pagination paginator page_obj %}
