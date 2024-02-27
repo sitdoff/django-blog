@@ -1,0 +1,3 @@
+{% if request.user.is_author and post.is_draft and post.author == request.user %}
+    <a href="{% url 'edit_draft' post.slug %}" class="btn btn-danger">Редактировать черновик</a>
+{% endif %}

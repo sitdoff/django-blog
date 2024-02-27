@@ -22,6 +22,22 @@ def pagination(paginator, page_obj):
     return {"page_obj": page_obj, "paginator": paginator}
 
 
+@register.inclusion_tag("blog/tags_templates/author_buttons_for_drafts.html", takes_context=True)
+def author_buttons_for_drafts(context):
+    """
+    Inserts buttons for reading or editing a draft on the Drafts page.
+    """
+    return {"post": context["post"]}
+
+
+@register.inclusion_tag("blog/tags_templates/author_buttons_for_single_draft.html", takes_context=True)
+def author_buttons_for_single_draft(context):
+    """
+    Inserts buttons for editing on the draft reading page.
+    """
+    return {"post": context["post"], "request": context["request"]}
+
+
 @register.inclusion_tag("blog/tags_templates/staff_buttons_for_unpublished_posts.html", takes_context=True)
 def staff_buttons_for_unpublished_posts_tag(context):
     """

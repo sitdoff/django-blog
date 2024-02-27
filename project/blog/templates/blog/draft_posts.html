@@ -9,7 +9,6 @@
 {% endblock title %}
 
 {% block content %}
-    <!-- Home Section -->
     <!-- Blog Section -->
     <section id="blog">
         <div class="container">
@@ -41,9 +40,8 @@
                             </div>
                             <div class="blog-post-des">
                                 <p>{{ post.article|safe|truncatewords:100 }}</p>
-                                <a href="{% url 'draft' post.slug %}" class="btn btn-default">Читать</a>
-                                <a href="{% url 'edit_draft' post.slug %}" class="btn btn-default">Edit</a>
                             </div>
+                            {% author_buttons_for_drafts %}
                         </div>
                     {% endfor %}
                     <!-- Блок пагинации -->
