@@ -15,7 +15,9 @@ from .utils import (
 
 
 class CreateTestUsersAndPostsMixin:
-    """Create users and post's objects for tests"""
+    """
+    Create users and post's objects for tests
+    """
 
     users = [
         {"username": "user", "email": "user@test.com", "is_active": True},
@@ -38,7 +40,9 @@ class CreateTestUsersAndPostsMixin:
     }
 
     def setUp(self):
-        """Create users and posts from class's data"""
+        """
+        Create users and posts from class's data
+        """
 
         self.test_users = [None]
         self.test_posts = []
@@ -52,9 +56,51 @@ class CreateTestUsersAndPostsMixin:
             post = Post.objects.create(author=author, **self.posts[post_data])
             self.test_posts.append(post)
 
+class AccessMixin:
+    """
+    Mixin сontains methods for testing status codes for a specific URL.
+    """
 
-class TestBlog(CreateTestUsersAndPostsMixin, TestCase):
-    """Checks the availability of public pages"""
+    def access_test_with_all_users(
+        self,
+        url,
+        none_user_status_code,
+        user_status_code,
+        author_status_code,
+        staff_status_code,
+        authorstaff_status_code,
+        admin_status_code,
+    ):
+        """
+        Makes a GET request to the specified URL on behalf of all users and compares the response status code with the specified one.
+        """
+
+        self.client.logout()
+
+        for user in self.test_users:
+            if user is not None:
+                self.client.force_login(user)
+            response = self.client.get(url)
+            if user is None:
+                self.assertEqual(response.status_code, none_user_status_code)
+                self.assertRedirects(response, expected_url=reverse("users:login") + f"?next={url}")
+            elif not user.is_author and not user.is_staff:
+                self.assertEqual(response.status_code, user_status_code)
+            elif user.is_author and user.is_staff:
+                self.assertEqual(response.status_code, authorstaff_status_code)
+            elif user.is_author:
+                self.assertEqual(response.status_code, author_status_code)
+            elif user.is_staff and not user.is_superuser:
+                self.assertEqual(response.status_code, staff_status_code)
+            elif user.is_superuser:
+                self.assertEqual(response.status_code, admin_status_code)
+            self.client.logout()
+
+
+class TestBlog(CreateTestUsersAndPostsMixin, AccessMixin, TestCase):
+    """
+    Checks the availability of public pages
+    """
 
     pages = {
         "home": {"url": "/", "kwargs": {}},
@@ -68,13 +114,52 @@ class TestBlog(CreateTestUsersAndPostsMixin, TestCase):
     }
 
     def test_pages(self):
-        """Creates addresses of public pages and checks their availability."""
+        """
+        Creates addresses of public pages and checks their availability.
+        """
         for url_name in self.pages:
             url = reverse(url_name, kwargs=self.pages[url_name]["kwargs"])
             response = self.client.get(url)
             self.assertEqual(response.request["PATH_INFO"], self.pages[url_name]["url"])
             self.assertEqual(response.status_code, 200, f"\n\nUrl is {url}.\nStaus-code is {response.status_code}")
             print(f'Page "{url}" OK')
+
+    def test_access_add_post(self):
+        test_data = {
+            "url": reverse('add_post'),
+            "none_user_status_code": 302,
+            "user_status_code": 403,
+            "author_status_code": 200,
+            "staff_status_code": 403,
+            "authorstaff_status_code": 200,
+            "admin_status_code": 200,
+        }
+        self.access_test_with_all_users(**test_data)
+
+    def test_access_edit_draft(self):
+        test_data = {
+            "url": reverse('edit_draft', kwargs={"post_slug": "draft-post"}),
+            "none_user_status_code": 302,
+            "user_status_code": 403,
+            "author_status_code": 200,
+            "staff_status_code": 403,
+            "authorstaff_status_code": 403,
+            "admin_status_code": 200,
+        }
+        self.access_test_with_all_users(**test_data)
+
+    def test_edit_unpublished_post(self):
+        test_data = {
+            "url": reverse('edit_unpublished_post', kwargs={"post_slug": "unpublished-post"}),
+            "none_user_status_code": 302,
+            "user_status_code": 403,
+            "author_status_code": 403,
+            "staff_status_code": 200,
+            "authorstaff_status_code": 200,
+            "admin_status_code": 200,
+        }
+        self.access_test_with_all_users(**test_data)
+
 
 
 class TestAddPostView(TestCase):
@@ -181,53 +266,17 @@ class TestAddPostView(TestCase):
         self.assertContains(response, "Пост с таким заголовком уже существует")
 
 
-class TestEditDraftPostView(CreateTestUsersAndPostsMixin, TestCase):
+class TestEditDraftPostView(CreateTestUsersAndPostsMixin, AccessMixin, TestCase):
     """
     Test EditDraftPostView
     """
 
-    def access_test_with_all_users(
-        self,
-        post_slug,
-        none_user_status_code,
-        user_status_code,
-        author_status_code,
-        staff_status_code,
-        authorstaff_status_code,
-        admin_status_code,
-    ):
-        """
-        Accesses the edit page of an unpublished post with the specified slug and compares the code status with the expected ones.
-        """
-        post = Post.objects.get(slug=post_slug)
-
-        self.client.logout()
-
-        for user in self.test_users:
-            if user is not None:
-                self.client.force_login(user)
-            response = self.client.get(reverse("edit_draft", kwargs={"post_slug": post.slug}))
-            if user is None:
-                self.assertEqual(response.status_code, none_user_status_code)
-                self.assertRedirects(response, expected_url=reverse("users:login") + f"?next=/drafts/edit/{post.slug}")
-            elif not user.is_author and not user.is_staff:
-                self.assertEqual(response.status_code, user_status_code)
-            elif user.is_author and user.is_staff:
-                self.assertEqual(response.status_code, authorstaff_status_code)
-            elif user.is_author:
-                self.assertEqual(response.status_code, author_status_code)
-            elif user.is_staff and not user.is_superuser:
-                self.assertEqual(response.status_code, staff_status_code)
-            elif user.is_superuser:
-                self.assertEqual(response.status_code, admin_status_code)
-            self.client.logout()
-
-    def test_access_draft(self):
+    def test_draft_in_edit_draft_view(self):
         """
         Test view with a draft.
         """
         test_data = {
-            "post_slug": "draft-post",
+            "url": reverse("edit_draft", kwargs={"post_slug": "draft-post"}),
             "none_user_status_code": 302,
             "user_status_code": 403,
             "author_status_code": 200,
@@ -237,12 +286,12 @@ class TestEditDraftPostView(CreateTestUsersAndPostsMixin, TestCase):
         }
         self.access_test_with_all_users(**test_data)
 
-    def test_access_unpublished_post(self):
+    def test_unpublished_post_in_edit_draft_view(self):
         """
         Test view with an unpublished post.
         """
         test_data = {
-            "post_slug": "unpublished-post",
+            "url": reverse("edit_draft", kwargs={"post_slug": "unpublished-post"}),
             "none_user_status_code": 302,
             "user_status_code": 403,
             "author_status_code": 404,
@@ -251,13 +300,13 @@ class TestEditDraftPostView(CreateTestUsersAndPostsMixin, TestCase):
             "admin_status_code": 404,
         }
         self.access_test_with_all_users(**test_data)
-
-    def test_access_published_post(self):
+    
+    def test_published_post_in_edit_draft_view(self):
         """
         Test view with a published post.
         """
         test_data = {
-            "post_slug": "published-post",
+            "url": reverse("edit_draft", kwargs={"post_slug": "published-post"}),
             "none_user_status_code": 302,
             "user_status_code": 403,
             "author_status_code": 404,
@@ -267,7 +316,7 @@ class TestEditDraftPostView(CreateTestUsersAndPostsMixin, TestCase):
         }
         self.access_test_with_all_users(**test_data)
 
-    def test_edit_draft_as_draft(self):
+    def test_save_draft_as_draft(self):
         """
         Testing draft editing. The status of the post remains draft.
         """
@@ -304,7 +353,7 @@ class TestEditDraftPostView(CreateTestUsersAndPostsMixin, TestCase):
         self.assertEqual(edited_post.is_draft, True)
         self.assertEqual(edited_post.is_published, False)
 
-    def test_edit_draft_as_unpublished_post(self):
+    def test_save_draft_as_unpublished_post(self):
         """
         Testing draft editing. The post status becomes "unpublished".
         """
@@ -341,7 +390,7 @@ class TestEditDraftPostView(CreateTestUsersAndPostsMixin, TestCase):
         self.assertEqual(edited_post.is_draft, False)
         self.assertEqual(edited_post.is_published, False)
 
-    def test_set_draft_existing_title(self):
+    def test_save_draft_with_existing_title(self):
         """
         Test the installation of a post of an existing title.
         """
@@ -428,7 +477,7 @@ class TestEditDraftPostView(CreateTestUsersAndPostsMixin, TestCase):
         is_exist = Post.objects.filter(slug="draft-post").exists()
         self.assertEqual(is_exist, False)
 
-    def test_set_published_status(self):
+    def test_set_to_draft_published_status(self):
         """
         Test installation of draft status published.
         """
@@ -454,55 +503,32 @@ class TestEditDraftPostView(CreateTestUsersAndPostsMixin, TestCase):
         self.assertFalse(post.is_published)
 
 
-class TestEditUnpublishedPostViews(CreateTestUsersAndPostsMixin, TestCase):
+class TestEditUnpublishedPostViews(CreateTestUsersAndPostsMixin, AccessMixin, TestCase):
     """
     EditUnpublishedPost View tests.
     """
 
-    def access_test_with_all_users(
-        self,
-        post_slug,
-        none_user_status_code,
-        user_status_code,
-        author_status_code,
-        staff_status_code,
-        authorstaff_status_code,
-        admin_status_code,
-    ):
+    def test_draft_in_edit_unpublished_post_view(self):
         """
-        Accesses the edit page of an unpublished post with the specified slug and compares the code status with the expected ones.
+        Testing with a draft.
         """
-        post = Post.objects.get(slug=post_slug)
+        test_data = {
+            "url": reverse("edit_unpublished_post", kwargs={"post_slug": "draft-post"}),
+            "none_user_status_code": 302,
+            "user_status_code": 403,
+            "author_status_code": 403,
+            "staff_status_code": 404,
+            "authorstaff_status_code": 404,
+            "admin_status_code": 404,
+        }
+        self.access_test_with_all_users(**test_data)
 
-        self.client.logout()
-
-        for user in self.test_users:
-            if user is not None:
-                self.client.force_login(user)
-            response = self.client.get(reverse("edit_unpublished_post", kwargs={"post_slug": post.slug}))
-            if user is None:
-                self.assertEqual(response.status_code, none_user_status_code)
-                self.assertRedirects(
-                    response, expected_url=reverse("users:login") + f"?next=/unpublished/edit/{post.slug}"
-                )
-            elif not user.is_author and not user.is_staff:
-                self.assertEqual(response.status_code, user_status_code)
-            elif user.is_author and user.is_staff:
-                self.assertEqual(response.status_code, authorstaff_status_code)
-            elif user.is_author:
-                self.assertEqual(response.status_code, author_status_code)
-            elif user.is_staff:
-                self.assertEqual(response.status_code, staff_status_code)
-            elif user.is_superuser:
-                self.assertEqual(response.status_code, admin_status_code)
-            self.client.logout()
-
-    def test_access_unpublished_post(self):
+    def test_unpublished_post_in_unpublished_post_view(self):
         """
         Testing with an unpublished post.
         """
         test_data = {
-            "post_slug": "unpublished-post",
+            "url": reverse("edit_unpublished_post", kwargs={"post_slug": "unpublished-post"}),
             "none_user_status_code": 302,
             "user_status_code": 403,
             "author_status_code": 403,
@@ -512,27 +538,12 @@ class TestEditUnpublishedPostViews(CreateTestUsersAndPostsMixin, TestCase):
         }
         self.access_test_with_all_users(**test_data)
 
-    def test_access_draft(self):
-        """
-        Testing with a draft.
-        """
-        test_data = {
-            "post_slug": "draft-post",
-            "none_user_status_code": 302,
-            "user_status_code": 403,
-            "author_status_code": 403,
-            "staff_status_code": 404,
-            "authorstaff_status_code": 404,
-            "admin_status_code": 404,
-        }
-        self.access_test_with_all_users(**test_data)
-
-    def test_access_published_post(self):
+    def test_published_post_in_unpublished_post_view(self):
         """
         Testing with a published post.
         """
         test_data = {
-            "post_slug": "published-post",
+            "url": reverse("edit_unpublished_post", kwargs={"post_slug": "published-post"}),
             "none_user_status_code": 302,
             "user_status_code": 403,
             "author_status_code": 403,
@@ -541,10 +552,10 @@ class TestEditUnpublishedPostViews(CreateTestUsersAndPostsMixin, TestCase):
             "admin_status_code": 404,
         }
         self.access_test_with_all_users(**test_data)
-
+    
     def test_edit_unpublished_post_view(self):
         """
-        Tests editing an unpublished post.
+        Test editing an unpublished post.
         """
         user = CustomUser.objects.get(username="staff")
         old_post = Post.objects.get(slug="unpublished-post")
@@ -578,7 +589,7 @@ class TestEditUnpublishedPostViews(CreateTestUsersAndPostsMixin, TestCase):
 
     def test_return_unpublished_post_to_draft(self):
         """
-        Tests returning an unpublished post to the author's draft.
+        Test returning an unpublished post to the author's draft.
         """
         staff = CustomUser.objects.get(username="staff")
         author = CustomUser.objects.get(username="author")
@@ -630,7 +641,7 @@ class TestEditUnpublishedPostViews(CreateTestUsersAndPostsMixin, TestCase):
 
     def test_publishing_post(self):
         """
-        Tests publishing an unpublished post.
+        Test publishing an unpublished post.
         """
         user = CustomUser.objects.get(username="staff")
         old_post = Post.objects.get(slug="unpublished-post")
