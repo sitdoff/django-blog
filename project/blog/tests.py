@@ -32,6 +32,7 @@ class CreateTestUsersAndPostsMixin:
     ]
     posts = {
         "draft": {"title": "draft_post", "is_draft": True, "is_published": False},
+        "draft2": {"title": "draft_post_second", "is_draft": True, "is_published": False},
         "unpublished": {"title": "unpublished_post", "is_draft": False, "is_published": False},
         "published": {"title": "published_post", "is_draft": False, "is_published": True},
     }
@@ -153,8 +154,118 @@ class TestAddPostView(TestCase):
         self.assertEqual(post.is_draft, False)
         self.assertEqual(post.is_published, False)
 
+    def test_add_post_with_existing_title(self):
+        """
+        Testing validation of title uniqueness when creating a new post.
+        """
+        user_data = {"username": "author", "email": "author@test.com", "is_author": True, "is_active": True}
+        author = CustomUser.objects.create(**user_data)
+        self.client.force_login(author)
+
+        form_data = {
+            "title": "draft_post",
+            "epigraph": "draft_post",
+            "article": "draft_post",
+            "image": "",
+            "status": "is_draft",
+        }
+        response = self.client.post(reverse("add_post"), data=form_data)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("drafts"))
+
+        is_exist = Post.objects.filter(title="draft_post").exists()
+        self.assertEqual(is_exist, True)
+
+        response = self.client.post(reverse("add_post"), data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Пост с таким заголовком уже существует")
+
 
 class TestEditDraftPostView(CreateTestUsersAndPostsMixin, TestCase):
+    """
+    Test EditDraftPostView
+    """
+
+    def access_test_with_all_users(
+        self,
+        post_slug,
+        none_user_status_code,
+        user_status_code,
+        author_status_code,
+        staff_status_code,
+        authorstaff_status_code,
+        admin_status_code,
+    ):
+        """
+        Accesses the edit page of an unpublished post with the specified slug and compares the code status with the expected ones.
+        """
+        post = Post.objects.get(slug=post_slug)
+
+        self.client.logout()
+
+        for user in self.test_users:
+            if user is not None:
+                self.client.force_login(user)
+            response = self.client.get(reverse("edit_draft", kwargs={"post_slug": post.slug}))
+            if user is None:
+                self.assertEqual(response.status_code, none_user_status_code)
+                self.assertRedirects(response, expected_url=reverse("users:login") + f"?next=/drafts/edit/{post.slug}")
+            elif not user.is_author and not user.is_staff:
+                self.assertEqual(response.status_code, user_status_code)
+            elif user.is_author and user.is_staff:
+                self.assertEqual(response.status_code, authorstaff_status_code)
+            elif user.is_author:
+                self.assertEqual(response.status_code, author_status_code)
+            elif user.is_staff and not user.is_superuser:
+                self.assertEqual(response.status_code, staff_status_code)
+            elif user.is_superuser:
+                self.assertEqual(response.status_code, admin_status_code)
+            self.client.logout()
+
+    def test_access_draft(self):
+        """
+        Test view with a draft.
+        """
+        test_data = {
+            "post_slug": "draft-post",
+            "none_user_status_code": 302,
+            "user_status_code": 403,
+            "author_status_code": 200,
+            "staff_status_code": 403,
+            "authorstaff_status_code": 403,  # Пост принадлежит другому автору, поэтому доступ запрещен
+            "admin_status_code": 200,  # Админ может редактировать любой черновик
+        }
+        self.access_test_with_all_users(**test_data)
+
+    def test_access_unpublished_post(self):
+        """
+        Test view with an unpublished post.
+        """
+        test_data = {
+            "post_slug": "unpublished-post",
+            "none_user_status_code": 302,
+            "user_status_code": 403,
+            "author_status_code": 404,
+            "staff_status_code": 403,
+            "authorstaff_status_code": 403,
+            "admin_status_code": 404,
+        }
+        self.access_test_with_all_users(**test_data)
+
+    def test_access_published_post(self):
+        """
+        Test view with a published post.
+        """
+        test_data = {
+            "post_slug": "published-post",
+            "none_user_status_code": 302,
+            "user_status_code": 403,
+            "author_status_code": 404,
+            "staff_status_code": 403,
+            "authorstaff_status_code": 403,
+            "admin_status_code": 404,
+        }
+        self.access_test_with_all_users(**test_data)
 
     def test_edit_draft_as_draft(self):
         """
@@ -230,7 +341,50 @@ class TestEditDraftPostView(CreateTestUsersAndPostsMixin, TestCase):
         self.assertEqual(edited_post.is_draft, False)
         self.assertEqual(edited_post.is_published, False)
 
+    def test_set_draft_existing_title(self):
+        """
+        Test the installation of a post of an existing title.
+        """
+        is_exits_first = Post.objects.filter(title="draft_post").exists()
+        self.assertTrue(is_exits_first)
+
+        is_exits_second = Post.objects.filter(title="draft_post_second").exists()
+        self.assertTrue(is_exits_second)
+
+        first_post = Post.objects.get(title="draft_post")
+        second_post = Post.objects.get(title="draft_post_second")
+        self.assertNotEqual(first_post.title, second_post.title)
+
+        user = CustomUser.objects.get(username="author")
+        self.client.force_login(user)
+
+        form_data = {
+            "title": "draft_post",
+            "epigraph": "draft_post",
+            "article": "draft_post",
+            "image": "",
+            "status": "is_draft",
+        }
+        response = self.client.post(
+            reverse("edit_draft", kwargs={"post_slug": slugify("draft_post_second")}), data=form_data
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Пост с таким заголовком уже существует")
+
+        is_exits_first = Post.objects.filter(title="draft_post").exists()
+        self.assertTrue(is_exits_first)
+
+        is_exits_second = Post.objects.filter(title="draft_post_second").exists()
+        self.assertTrue(is_exits_second)
+
+        first_post = Post.objects.get(title="draft_post")
+        second_post = Post.objects.get(title="draft_post_second")
+        self.assertNotEqual(first_post.title, second_post.title)
+
     def test_change_status_exitst_draft(self):
+        """
+        Test changing the post title to an existing one.
+        """
         post = Post.objects.get(slug="draft-post")
         user = CustomUser.objects.get(username="author")
         self.client.force_login(user)
@@ -260,9 +414,6 @@ class TestEditDraftPostView(CreateTestUsersAndPostsMixin, TestCase):
         is_exist = Post.objects.filter(slug="draft-post").exists()
         self.assertEqual(is_exist, True)
 
-        # form_data = {
-        #     "status": "delete_draft",
-        # }
         form_data = {
             "title": "draft_post",
             "epigraph": "draft_post",
@@ -276,6 +427,31 @@ class TestEditDraftPostView(CreateTestUsersAndPostsMixin, TestCase):
 
         is_exist = Post.objects.filter(slug="draft-post").exists()
         self.assertEqual(is_exist, False)
+
+    def test_set_published_status(self):
+        """
+        Test installation of draft status published.
+        """
+        post = Post.objects.get(slug="draft-post")
+        self.assertTrue(post.is_draft)
+        self.assertFalse(post.is_published)
+
+        author = CustomUser.objects.get(username="author")
+        self.client.force_login(author)
+
+        form_data = {
+            "title": "draft_post",
+            "epigraph": "draft_post",
+            "article": "draft_post",
+            "image": "",
+            "status": "is_published",
+        }
+        response = self.client.post(reverse("edit_draft", kwargs={"post_slug": post.slug}), data=form_data)
+        self.assertEqual(response.status_code, 200)
+
+        post = Post.objects.get(slug="draft-post")
+        self.assertTrue(post.is_draft)
+        self.assertFalse(post.is_published)
 
 
 class TestEditUnpublishedPostViews(CreateTestUsersAndPostsMixin, TestCase):
@@ -293,6 +469,9 @@ class TestEditUnpublishedPostViews(CreateTestUsersAndPostsMixin, TestCase):
         authorstaff_status_code,
         admin_status_code,
     ):
+        """
+        Accesses the edit page of an unpublished post with the specified slug and compares the code status with the expected ones.
+        """
         post = Post.objects.get(slug=post_slug)
 
         self.client.logout()
