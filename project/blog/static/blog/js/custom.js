@@ -52,8 +52,6 @@ function clickButtons() {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-  console.log("START!");
   // Вызываем функцию через 5 секунд
   setTimeout(clickButtons, 5000);
-  console.log("END!");
 });
