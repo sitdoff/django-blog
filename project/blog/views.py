@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.messages.views import SuccessMessageMixin
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
+from django.template.response import TemplateResponse
 from django.urls import reverse, reverse_lazy
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, UpdateView
@@ -238,8 +239,10 @@ def about(request):
 
 
 def gallery(request):
-    """Page gallery view"""
-    return HttpResponse("gallery")
+    """
+    Page gallery view
+    """
+    return TemplateResponse(request, "blog/gallery.html")
 
 
 def contact(request):
