@@ -49,6 +49,13 @@
                                 {% staff_buttons_for_unpublished_posts_tag %}
                             </div>
                         {% endif %}
+                    {% empty %}
+                        <div class="container" align="center">
+                            <div class="blog-comment-form">
+                                <h2>Нет неопубликованных постов.</h2>
+                                <p>Возможно скоро здесь что-то появится.</p>
+                            </div>
+                        </div>
                     {% endfor %}
                     <!-- Блок пагинации -->
                     {% pagination paginator page_obj %}

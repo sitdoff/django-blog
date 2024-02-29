@@ -1,11 +1,14 @@
 {% extends "blog/base.html" %}
+
 {% load blog_tags %}
+
 {% load users_tags %}
+
 {% block title %}
     {{ title }}
 {% endblock title %}
+
 {% block content %}
-    <!-- Home Section -->
     <!-- Blog Section -->
     <section id="blog">
         <div class="container">
@@ -15,8 +18,8 @@
                         <div class="blog-post-thumb">
                             {% if post.image %}
                                 <div class="blog-post-image">
-                                    <a href="{{ post.get_absolute_url }}">
-                                        <img src="{{ post.image.url }}" class="img-responsive" alt="Blog Image">
+                                    <a href="{% url 'draft' post.slug %}">
+                                        <img src="{{ post.image.url }}" class="img-responsive" alt="Blog Image" />
                                     </a>
                                 </div>
                             {% endif %}
@@ -27,7 +30,7 @@
                                     {% elif not post.is_published %}
                                         <span style="color: red">[UNPUBLISHED]</span>
                                     {% endif %}
-                                    <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+                                    <a href="{% url 'draft' post.slug %}">{{ post.title }}</a>
                                 </h3>
                             </div>
                             <div class="blog-post-format">
@@ -37,8 +40,16 @@
                             </div>
                             <div class="blog-post-des">
                                 <p>{{ post.article|safe|truncatewords:100 }}</p>
-                                <a href="{{ post.get_absolute_url }}" class="btn btn-default">Читать</a>
-                                <a href="{% url 'edit_post' post.slug %}" class="btn btn-default">Edit</a>
+                            </div>
+                            {% author_buttons_for_drafts %}
+                        </div>
+                    {% empty %}
+                        <div class="container" align="center">
+                            <div class="blog-comment-form">
+                                <h2>У вас нет черновиков</h2>
+                                <p>
+                                    <a href="{% url 'add_post' %}">Желаете добавить?</a>
+                                </p>
                             </div>
                         </div>
                     {% endfor %}

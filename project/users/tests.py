@@ -44,7 +44,10 @@ class TestPermissions(CreateTestUsersAndPostsMixin, TestCase):
             "access": ("staff", "authorstaff", "admin"),
             "kwargs": {"post_slug": "unpublished-post"},
         },
-        "edit_post": {"access": ("staff", "authorstaff", "admin"), "kwargs": {"post_slug": "unpublished-post"}},
+        "edit_unpublished_post": {
+            "access": ("staff", "authorstaff", "admin"),
+            "kwargs": {"post_slug": "unpublished-post"},
+        },
         "users:profile_edit": {
             "access": ("author", "authorstaff", "admin"),
             "kwargs": {},
