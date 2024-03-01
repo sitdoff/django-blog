@@ -234,8 +234,10 @@ def set_editor(request: HttpRequest) -> HttpResponseRedirect:
 
 
 def about(request):
-    """Page about view"""
-    return HttpResponse("about")
+    """
+    Page about view
+    """
+    return TemplateResponse(request, "blog/about.html")
 
 
 def gallery(request):
@@ -247,4 +249,4 @@ def gallery(request):
 
 def contact(request):
     """Page contact view"""
-    return HttpResponse("contact")
+    return TemplateResponse(request, "blog/contact.html")
