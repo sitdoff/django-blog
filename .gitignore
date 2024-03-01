@@ -12,6 +12,7 @@ project/media/images/*
 project/media/user_admin/
 project/media/userpic/
 !project/media/images/gallery-image*.jpg
+!project/media/images/about*.jpg
 todo.txt
 env/
 venv/
