@@ -249,4 +249,4 @@ def gallery(request):
 
 def contact(request):
     """Page contact view"""
-    return HttpResponse("contact")
+    return TemplateResponse(request, "blog/contact.html")
