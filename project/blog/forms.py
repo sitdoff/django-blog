@@ -64,7 +64,8 @@ class AddPostForm(forms.ModelForm):
 
         if commit:
             if self.cleaned_data["status"] == "delete_draft":
-                instance.delete()
+                if instance.pk:
+                    instance.delete()
                 messages.warning(self.request, "Вы удалили черновик")
             else:
                 instance.save()
