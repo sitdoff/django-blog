@@ -89,7 +89,7 @@
                             </div>
                             <div class="media-body">
                                 <h3 class="media-heading">
-                                    {{ comment.author.first_name|default:comment.author.username }}
+                                    <a href="{{ comment.author.get_absolute_url }}" class="comment-username">{{ comment.author.first_name|default:comment.author.username }}</a>
                                 </h3>
                                 <span>{{ comment.time_create }}</span>
                                 <p>{{ comment.content }}</p>
