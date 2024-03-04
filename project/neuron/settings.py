@@ -170,8 +170,8 @@ CKEDITOR_IMAGE_BACKEND = "pillow"
 CKEDITOR_JQUERY_URL = "//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"
 CKEDITOR_ALLOW_NONIMAGE_FILES = False
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-# EMAIL_PORT = 1025
+EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, "emails")
 
 # Celery settings
 
