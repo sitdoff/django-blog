@@ -888,3 +888,7 @@ footer .footer-copyright {
     width: 50vh;
     margin-left: 1vh;
 }
+
+.comment-username {
+    color: black;
+}
