@@ -136,3 +136,40 @@ class TestActivateUser(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.request["PATH_INFO"], "/user/activate/" + signer.sign(user.username))
         self.assertEqual(user.is_active, True)
+
+
+class TestSubscription(CreateTestUsersAndPostsMixin, TestCase):
+    """
+    Testing subscriptions for authors.
+    """
+
+    def test_subscription_field_for_user(self):
+        """
+        Testing the "subscriptions" field in the CustomUser model for common user.
+        """
+        user = CustomUser.objects.get(username="user")
+        author = CustomUser.objects.get(username="author")
+
+        self.assertEqual(user.subscriptions.count(), 0)
+        self.assertNotIn(author, user.subscriptions.all())
+
+        user.subscriptions.add(author)
+        self.assertEqual(user.subscriptions.count(), 1)
+        self.assertIn(author, user.subscriptions.all())
+        self.assertEqual(user.subscriptions.all()[0], author)
+
+    def test_subscription_field_for_author(self):
+        """
+        Testing the "subscriptions" field in the CustomUser model for author.
+        """
+
+        user = CustomUser.objects.get(username="user")
+        author = CustomUser.objects.get(username="author")
+
+        self.assertEqual(author.subscribers.count(), 0)
+        self.assertNotIn(user, author.subscribers.all())
+
+        user.subscriptions.add(author)
+        self.assertEqual(author.subscribers.count(), 1)
+        self.assertIn(user, author.subscribers.all())
+        self.assertEqual(author.subscribers.all()[0], user)
