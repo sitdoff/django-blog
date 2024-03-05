@@ -1,10 +1,11 @@
 from blog.mixins import TitleMixin
 from blog.models import Post
+from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.signing import BadSignature
 from django.db.models.query import QuerySet
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
@@ -107,3 +108,22 @@ def user_activate(request: HttpRequest, sign: str) -> HttpResponse:
         login(request, user)
 
     return render(request, template)
+
+
+def subscribe(request: HttpRequest, author_username: str):
+    """
+    Add author in user's subscriptions
+    """
+    author = get_object_or_404(CustomUser, username=author_username)
+    if author in request.user.subscriptions.all():
+        return JsonResponse({"message": f"Вы уже подписаны на {author}"}, json_dumps_params={"ensure_ascii": False})
+    if author.is_author:
+        request.user.subscriptions.add(author)
+        messages.add_message(request, messages.SUCCESS, f"Вы подписались на автора {author_username}")
+        return JsonResponse(
+            {"message": f"Вы подписались на автора {author_username}"}, json_dumps_params={"ensure_ascii": False}
+        )
+    messages.add_message(request, messages.WARNING, f"{author_username} не является автором")
+    return JsonResponse(
+        {"message": f"{author_username} не является автором"}, json_dumps_params={"ensure_ascii": False}
+    )

@@ -1,10 +1,17 @@
+import json
+
 from blog.tests import CreateTestUsersAndPostsMixin
+from django.contrib.messages.middleware import MessageMiddleware
+from django.contrib.sessions.middleware import SessionMiddleware
 from django.core import mail
 from django.core.signing import Signer
+from django.http import HttpRequest
+from django.http.response import Http404
 from django.shortcuts import reverse
-from django.test import TestCase
+from django.test import RequestFactory, TestCase
 from django.test.client import Client
 from users.models import CustomUser
+from users.views import subscribe
 
 from neuron.settings import ALLOWED_HOSTS
 
@@ -140,12 +147,12 @@ class TestActivateUser(TestCase):
 
 class TestSubscription(CreateTestUsersAndPostsMixin, TestCase):
     """
-    Testing subscriptions for authors.
+    Test subscriptions for authors.
     """
 
     def test_subscription_field_for_user(self):
         """
-        Testing the "subscriptions" field in the CustomUser model for common user.
+        Test the "subscriptions" field in the CustomUser model for common user.
         """
         user = CustomUser.objects.get(username="user")
         author = CustomUser.objects.get(username="author")
@@ -160,7 +167,7 @@ class TestSubscription(CreateTestUsersAndPostsMixin, TestCase):
 
     def test_subscription_field_for_author(self):
         """
-        Testing the "subscriptions" field in the CustomUser model for author.
+        Test the "subscriptions" field in the CustomUser model for author.
         """
 
         user = CustomUser.objects.get(username="user")
@@ -173,3 +180,96 @@ class TestSubscription(CreateTestUsersAndPostsMixin, TestCase):
         self.assertEqual(author.subscribers.count(), 1)
         self.assertIn(user, author.subscribers.all())
         self.assertEqual(author.subscribers.all()[0], user)
+
+    def test_subscribe_function_if_username_is_owned_by_author(self):
+        """
+        Tests the "subscribe" function if the author_username is owned by the author.
+        """
+        request_factory = RequestFactory()
+
+        user = CustomUser.objects.get(username="user")
+        author = CustomUser.objects.get(username="author")
+        self.assertEqual(user.subscriptions.count(), 0)
+        self.assertNotIn(author, user.subscriptions.all())
+
+        request = request_factory.get("/")
+        request.user = user
+
+        middleware = SessionMiddleware(lambda request: None)
+        middleware.process_request(request)
+        request.session.save()
+
+        middleware = MessageMiddleware(lambda request, response: None)
+        middleware.process_request(request)
+
+        response = subscribe(request, author.username)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(user.subscriptions.count(), 1)
+        self.assertIn(author, user.subscriptions.all())
+        json_response = json.loads(response.content)
+        self.assertIn("message", json_response)
+        self.assertEqual(json_response["message"], f"Вы подписались на автора {author.username}")
+        self.assertNotEqual(json_response["message"], f"{author.username} не является автором")
+
+        response = subscribe(request, author.username)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(user.subscriptions.count(), 1)
+        self.assertIn(author, user.subscriptions.all())
+        json_response = json.loads(response.content)
+        self.assertIn("message", json_response)
+        self.assertEqual(json_response["message"], f"Вы уже подписаны на {author.username}")
+        self.assertNotEqual(json_response["message"], f"Вы подписались на автора {author.username}")
+        self.assertNotEqual(json_response["message"], f"{author.username} не является автором")
+
+    def test_subscribe_function_if_username_is_not_owned_by_author(self):
+        """
+        Tests the "subscribe" function if the author_username is't owned by the author.
+        """
+        request_factory = RequestFactory()
+
+        user = CustomUser.objects.get(username="user")
+        not_author = CustomUser.objects.get(username="staff")
+        self.assertEqual(user.subscriptions.count(), 0)
+        self.assertNotIn(not_author, user.subscriptions.all())
+
+        request = request_factory.get("/")
+        request.user = user
+
+        middleware = SessionMiddleware(lambda request: None)
+        middleware.process_request(request)
+        request.session.save()
+
+        middleware = MessageMiddleware(lambda request, response: None)
+        middleware.process_request(request)
+
+        response = subscribe(request, not_author.username)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(user.subscriptions.count(), 0)
+        self.assertNotIn(not_author, user.subscriptions.all())
+        json_response = json.loads(response.content)
+        self.assertIn("message", json_response)
+        self.assertNotEqual(json_response["message"], f"Вы подписались на автора {not_author.username}")
+        self.assertEqual(json_response["message"], f"{not_author.username} не является автором")
+
+    def test_subscribe_function_if_username_does_not_exist(self):
+        """
+        Tests the "subscribe" function if the author_username dosen't exist
+        """
+        request_factory = RequestFactory()
+
+        user = CustomUser.objects.get(username="user")
+        do_not_exist = "super_author"
+        self.assertEqual(user.subscriptions.count(), 0)
+        self.assertNotIn(do_not_exist, user.subscriptions.all())
+        request = request_factory.get("/")
+        request.user = user
+
+        middleware = SessionMiddleware(lambda request: None)
+        middleware.process_request(request)
+        request.session.save()
+
+        middleware = MessageMiddleware(lambda request, response: None)
+        middleware.process_request(request)
+
+        with self.assertRaises(Http404):
+            subscribe(request, do_not_exist)
