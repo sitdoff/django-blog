@@ -1,5 +1,6 @@
 from blog.mixins import TitleMixin
 from blog.models import Post
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
@@ -114,16 +115,21 @@ def subscribe(request: HttpRequest, author_username: str):
     """
     Add author in user's subscriptions
     """
-    author = get_object_or_404(CustomUser, username=author_username)
+    author = get_object_or_404(CustomUser, username=author_username, is_author=True)
     if author in request.user.subscriptions.all():
-        return JsonResponse({"message": f"Вы уже подписаны на {author}"}, json_dumps_params={"ensure_ascii": False})
-    if author.is_author:
-        request.user.subscriptions.add(author)
-        messages.add_message(request, messages.SUCCESS, f"Вы подписались на автора {author_username}")
         return JsonResponse(
-            {"message": f"Вы подписались на автора {author_username}"}, json_dumps_params={"ensure_ascii": False}
+            {
+                "message": f"Вы уже подписаны на {author}",
+                "message_level": settings.MESSAGE_TAGS[messages.WARNING],
+            },
+            json_dumps_params={"ensure_ascii": False},
         )
-    messages.add_message(request, messages.WARNING, f"{author_username} не является автором")
+
+    request.user.subscriptions.add(author)
     return JsonResponse(
-        {"message": f"{author_username} не является автором"}, json_dumps_params={"ensure_ascii": False}
+        {
+            "message": f"Вы подписались на автора {author_username}",
+            "message_level": settings.MESSAGE_TAGS[messages.SUCCESS],
+        },
+        json_dumps_params={"ensure_ascii": False},
     )

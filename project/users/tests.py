@@ -242,14 +242,8 @@ class TestSubscription(CreateTestUsersAndPostsMixin, TestCase):
         middleware = MessageMiddleware(lambda request, response: None)
         middleware.process_request(request)
 
-        response = subscribe(request, not_author.username)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(user.subscriptions.count(), 0)
-        self.assertNotIn(not_author, user.subscriptions.all())
-        json_response = json.loads(response.content)
-        self.assertIn("message", json_response)
-        self.assertNotEqual(json_response["message"], f"Вы подписались на автора {not_author.username}")
-        self.assertEqual(json_response["message"], f"{not_author.username} не является автором")
+        with self.assertRaises(Http404):
+            subscribe(request, not_author.username)
 
     def test_subscribe_function_if_username_does_not_exist(self):
         """

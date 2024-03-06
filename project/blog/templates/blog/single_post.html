@@ -73,6 +73,9 @@
                                 </h3>
                                 <p>{{ post.author.bio }}</p>
                             </div>
+                            <div>
+                                <a href="#" id="subscribe-link" data-url="{% url 'users:subscribe' post.author.username %}">Подписаться</a>
+                            </div>
                         </div>
                     </div>
                     <!-- Commenst -->
