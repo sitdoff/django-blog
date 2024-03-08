@@ -1,10 +1,12 @@
 from blog.mixins import TitleMixin
 from blog.models import Post
+from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.signing import BadSignature
 from django.db.models.query import QuerySet
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
@@ -107,3 +109,39 @@ def user_activate(request: HttpRequest, sign: str) -> HttpResponse:
         login(request, user)
 
     return render(request, template)
+
+
+def subscribe(request: HttpRequest, author_username: str):
+    """
+    Add author in user's subscriptions
+    """
+    if request.user.is_anonymous:
+        return JsonResponse(
+            {
+                "message": f"Неавторизованные пользователи не могут подписываться",
+                "message_level": settings.MESSAGE_TAGS[messages.WARNING],
+            },
+            json_dumps_params={"ensure_ascii": False},
+        )
+    author = get_object_or_404(CustomUser, username=author_username, is_author=True)
+    if author in request.user.subscriptions.all():
+        return JsonResponse(
+            {
+                "message": f"Вы уже подписаны на {author}",
+                "message_level": settings.MESSAGE_TAGS[messages.WARNING],
+            },
+            json_dumps_params={"ensure_ascii": False},
+        )
+
+    request.user.subscriptions.add(author)
+
+    request.session["subscriptions"].append(author.username)
+    request.session.save()
+
+    return JsonResponse(
+        {
+            "message": f"Вы подписались на автора {author_username}",
+            "message_level": settings.MESSAGE_TAGS[messages.SUCCESS],
+        },
+        json_dumps_params={"ensure_ascii": False},
+    )
