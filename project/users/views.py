@@ -134,6 +134,10 @@ def subscribe(request: HttpRequest, author_username: str):
         )
 
     request.user.subscriptions.add(author)
+
+    request.session["subscriptions"].append(author.username)
+    request.session.save()
+
     return JsonResponse(
         {
             "message": f"Вы подписались на автора {author_username}",

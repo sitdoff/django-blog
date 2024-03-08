@@ -8,7 +8,7 @@ from django.core.signing import Signer
 from django.http import HttpRequest
 from django.http.response import Http404
 from django.shortcuts import reverse
-from django.test import RequestFactory, TestCase
+from django.test import Client, RequestFactory, TestCase
 from django.test.client import Client
 from users.models import CustomUser
 from users.views import subscribe
@@ -197,6 +197,7 @@ class TestSubscription(CreateTestUsersAndPostsMixin, TestCase):
 
         middleware = SessionMiddleware(lambda request: None)
         middleware.process_request(request)
+        request.session["subscriptions"] = []
         request.session.save()
 
         middleware = MessageMiddleware(lambda request, response: None)
@@ -267,3 +268,99 @@ class TestSubscription(CreateTestUsersAndPostsMixin, TestCase):
 
         with self.assertRaises(Http404):
             subscribe(request, do_not_exist)
+
+    def test_subscribe_by_url_if_username_is_owned_by_author(self):
+        """
+        Testing a subscription to the author.
+        """
+        user = CustomUser.objects.get(username="user")
+        author = CustomUser.objects.get(username="author")
+
+        self.assertEqual(user.subscriptions.count(), 0)
+        self.assertNotIn(author, user.subscriptions.all())
+
+        self.client.force_login(user)
+
+        response = self.client.get(reverse("users:subscribe", kwargs={"author_username": author.username}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(user.subscriptions.count(), 1)
+        self.assertIn(author, user.subscriptions.all())
+
+    def test_subscribe_by_url_if_username_is_not_owned_by_author(self):
+        """
+        Testing a subscription not to the author.
+        """
+        user = CustomUser.objects.get(username="user")
+        author = CustomUser.objects.get(username="staff")
+
+        self.assertEqual(user.subscriptions.count(), 0)
+        self.assertNotIn(author, user.subscriptions.all())
+
+        self.client.force_login(user)
+
+        response = self.client.get(reverse("users:subscribe", kwargs={"author_username": author.username}))
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(user.subscriptions.count(), 0)
+        self.assertNotIn(author, user.subscriptions.all())
+
+    def test_get_subscribe_data_in_session_when_anon_user_subscribe_by_url(self):
+        """
+        Test adding data to a session when an anonymous user tries to subscribe to the author.
+        """
+        author = CustomUser.objects.get(username="author")
+
+        response = self.client.get(reverse("home"), data={"username": "user", "password": "password"}, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context["user"].is_authenticated)
+        self.assertIsNone(self.client.session.get("subscriptions"))
+
+        response = self.client.get(reverse("users:subscribe", kwargs={"author_username": author.username}))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(self.client.session.get("subscriptions"), ["author"])
+
+    def test_get_subscribe_data_in_session_when_common_user_subscribe_by_url(self):
+        """
+        Test adding data to a session when a common user tries to subscribe to the author.
+        """
+        user = CustomUser.objects.get(username="user")
+        user.set_password("password")
+        user.save()
+        author = CustomUser.objects.get(username="author")
+
+        response = self.client.post("/user/login", data={"username": "user", "password": "password"}, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["user"].is_authenticated)
+        self.assertIsNotNone(self.client.session.get("subscriptions"))
+        self.assertEqual(self.client.session.get("subscriptions"), [])
+
+        response = self.client.get(reverse("users:subscribe", kwargs={"author_username": author.username}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.client.session.get("subscriptions"), ["author"])
+
+    def test_get_subscribe_data_in_session_when_user_login(self):
+        """
+        Test of adding data to a session when a common user logs in.
+        """
+        user = CustomUser.objects.get(username="user")
+        user.set_password("password")
+        user.save()
+        author = CustomUser.objects.get(username="author")
+
+        response = self.client.post("/user/login", data={"username": "user", "password": "password"}, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["user"].is_authenticated)
+        self.assertIsNotNone(self.client.session.get("subscriptions"))
+        self.assertEqual(self.client.session.get("subscriptions"), [])
+
+        response = self.client.get(reverse("users:subscribe", kwargs={"author_username": author.username}))
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(reverse("users:logout"))
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.post("/user/login", data={"username": "user", "password": "password"}, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["user"].is_authenticated)
+        self.assertIsNotNone(self.client.session.get("subscriptions"))
+        self.assertEqual(self.client.session.get("subscriptions"), ["author"])
+        self.assertIn("author", self.client.session.get("subscriptions"))
