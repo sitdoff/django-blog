@@ -309,7 +309,7 @@ class TestSubscription(CreateTestUsersAndPostsMixin, TestCase):
         """
         author = CustomUser.objects.get(username="author")
 
-        response = self.client.get(reverse("home"), data={"username": "user", "password": "password"}, follow=True)
+        response = self.client.get(reverse("home"))
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context["user"].is_authenticated)
         self.assertIsNone(self.client.session.get("subscriptions"))
@@ -327,7 +327,9 @@ class TestSubscription(CreateTestUsersAndPostsMixin, TestCase):
         user.save()
         author = CustomUser.objects.get(username="author")
 
-        response = self.client.post("/user/login", data={"username": "user", "password": "password"}, follow=True)
+        response = self.client.post(
+            reverse("users:login"), data={"username": "user", "password": "password"}, follow=True
+        )
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["user"].is_authenticated)
         self.assertIsNotNone(self.client.session.get("subscriptions"))
@@ -346,7 +348,9 @@ class TestSubscription(CreateTestUsersAndPostsMixin, TestCase):
         user.save()
         author = CustomUser.objects.get(username="author")
 
-        response = self.client.post("/user/login", data={"username": "user", "password": "password"}, follow=True)
+        response = self.client.post(
+            reverse("users:login"), data={"username": "user", "password": "password"}, follow=True
+        )
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["user"].is_authenticated)
         self.assertIsNotNone(self.client.session.get("subscriptions"))
@@ -358,7 +362,9 @@ class TestSubscription(CreateTestUsersAndPostsMixin, TestCase):
         response = self.client.get(reverse("users:logout"))
         self.assertEqual(response.status_code, 302)
 
-        response = self.client.post("/user/login", data={"username": "user", "password": "password"}, follow=True)
+        response = self.client.post(
+            reverse("users:login"), data={"username": "user", "password": "password"}, follow=True
+        )
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["user"].is_authenticated)
         self.assertIsNotNone(self.client.session.get("subscriptions"))

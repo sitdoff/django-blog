@@ -4,6 +4,7 @@ register = template.Library()
 
 navigation_menu = [
     {"title": "Главная", "url_name": "home"},
+    {"title": "Подписки", "url_name": "subscriptions"},
     {"title": "Обо мне", "url_name": "about"},
     {"title": "Галлерея", "url_name": "gallery"},
     {"title": "Контакты", "url_name": "contact"},
@@ -56,4 +57,7 @@ def staff_buttons_for_unpublished_single_post_tag(context):
 
 @register.inclusion_tag("blog/tags_templates/messages.html", takes_context=True)
 def messages_tag(context):
+    """
+    Add container for messages
+    """
     return {"messages": context["messages"]}

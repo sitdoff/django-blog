@@ -2,14 +2,16 @@ from blog.models import Post
 from django.core import mail
 from django.shortcuts import reverse
 from django.template.loader import render_to_string
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from slugify import slugify
 from users.models import CustomUser
+from django.contrib.sessions.middleware import SessionMiddleware
 
 from .utils import (
     send_mail_your_post_has_been_published,
     send_mail_your_post_has_been_returned,
 )
+from .views import SubscriptionsView
 
 # Create your tests here.
 
@@ -315,6 +317,22 @@ class TestEditDraftPostView(CreateTestUsersAndPostsMixin, AccessMixin, TestCase)
             "admin_status_code": 404,
         }
         self.access_test_with_all_users(**test_data)
+
+    def test_subscription(self):
+        """
+        Test view with subscriptions.
+        """
+        test_data = {
+            "url": reverse("subscriptions"),
+            "none_user_status_code": 302,
+            "user_status_code": 200,
+            "author_status_code": 200,
+            "staff_status_code": 200,
+            "authorstaff_status_code": 200,
+            "admin_status_code": 200,
+        }
+        self.access_test_with_all_users(**test_data)
+
 
     def test_save_draft_as_draft(self):
         """
@@ -773,3 +791,51 @@ class TestSendingLetterToAurhor(CreateTestUsersAndPostsMixin, TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, subject.strip())
         self.assertEqual(mail.outbox[0].body, body_text)
+
+
+class TestSubscriptionsView(CreateTestUsersAndPostsMixin, TestCase):
+    """
+    Test SubscriptionsView
+    """
+    def test_queryset(self):
+        """
+        Test only published posts in quetyset
+        """
+        request_factory = RequestFactory()
+        request = request_factory.get(reverse("subscriptions"))
+        request.user = CustomUser.objects.get(username='user')
+
+        middleware = SessionMiddleware(lambda request: None)
+        middleware.process_request(request)
+        request.session.save()
+
+        request.session['subscriptions'] = ['author']
+        request.session.save()
+
+        view = SubscriptionsView()
+        view.setup(request)
+        quetyset = view.get_queryset()
+
+        for post in quetyset:
+            self.assertTrue(post.is_published)
+
+    def test_view(self):
+        """
+        Test page before and after subscribe
+        """
+        user = CustomUser.objects.get(username='user')
+        author = CustomUser.objects.get(username='author')
+        self.client.force_login(user)
+        
+        response = self.client.get(reverse('subscriptions'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Вы еще ни на кого не подписаны", response.content.decode("utf-8"))
+
+        self.client.get(reverse("users:subscribe", kwargs={"author_username": author.username}))
+
+        response = self.client.get(reverse('subscriptions'))
+        self.assertEqual(response.status_code, 200)
+        for post in author.author_posts.filter(is_published=True)[:5]:
+            self.assertIn(post.title, response.content.decode('utf-8'))
+
+    
