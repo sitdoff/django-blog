@@ -1,4 +1,5 @@
 {% load users_tags %}
+
 <!-- Navigation section  -->
 <div class="navbar navbar-default navbar-static-top" role="navigation">
     <div class="container">
@@ -15,9 +16,13 @@
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-right">
                 {% for elem in navigation_menu %}
-                    <li>
-                        <a href="{% url elem.url_name %}">{{ elem.title }}</a>
-                    </li>
+                    {% if elem.url_name == "subscriptions" and user.is_anonymous %}
+                        <!-- continue -->
+                    {% else %}
+                        <li>
+                            <a href="{% url elem.url_name %}">{{ elem.title }}</a>
+                        </li>
+                    {% endif %}
                 {% endfor %}
                 {% auth_menu user %}
                 <!-- <li class="active"> -->

@@ -2,6 +2,7 @@ from comments.forms import CommentForm
 from comments.models import Comment
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -46,6 +47,29 @@ class IndexView(TitleMixin, ListView):
         if pinned_posts := self.model.objects.filter(is_pinned=True).select_related():
             context["pinned_posts"] = pinned_posts
         return context
+
+
+class SubscriptionsView(LoginRequiredMixin, TitleMixin, ListView):
+    """
+    Subscriptions view
+    """
+
+    title = "Мои подписки"
+    model = Post
+    template_name = "blog/subscriptions_posts.html"
+    paginate_by = 5
+    context_object_name = "posts"
+    login_url = reverse_lazy("users:login")
+
+    def get_queryset(self):
+        """
+        Returns posts only from those authors who are in the current user's subscriptions.
+        """
+        queryset = self.model.objects.filter(
+            author__username__in=self.request.session["subscriptions"],
+            is_published=True,
+        ).select_related()
+        return queryset
 
 
 class UnpublishedPostsView(IsStaffRequiredMixin, TitleMixin, ListView):
