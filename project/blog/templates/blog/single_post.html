@@ -1,4 +1,5 @@
-{% extends "blog/base.html" %} {% load users_tags %}
+{% extends "blog/base.html" %} 
+{% load users_tags %}
 {% load blog_tags %}
 {% block title %} {{ post.title }} {% endblock title %} {% block content %} {% if post.epigraph %}
 <!-- Home Section -->
@@ -73,9 +74,8 @@
                                 </h3>
                                 <p>{{ post.author.bio }}</p>
                             </div>
-                            <div>
-                                <a href="#" id="subscribe-link" data-url="{% url 'users:subscribe' post.author.username %}">Подписаться</a>
-                            </div>
+                            {% subscribe_link %}
+
                         </div>
                     </div>
                     <!-- Commenst -->
