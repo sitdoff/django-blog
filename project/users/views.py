@@ -118,7 +118,7 @@ def subscribe(request: HttpRequest, author_username: str):
     if request.user.is_anonymous:
         return JsonResponse(
             {
-                "message": f"Неавторизованные пользователи не могут подписываться",
+                "message": "Неавторизованные пользователи не могут подписываться",
                 "message_level": settings.MESSAGE_TAGS[messages.WARNING],
             },
             json_dumps_params={"ensure_ascii": False},

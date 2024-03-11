@@ -309,7 +309,7 @@ class TestSubscription(CreateTestUsersAndPostsMixin, TestCase):
         """
         author = CustomUser.objects.get(username="author")
 
-        response = self.client.get(reverse("home"), data={"username": "user", "password": "password"}, follow=True)
+        response = self.client.get(reverse("home"))
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context["user"].is_authenticated)
         self.assertIsNone(self.client.session.get("subscriptions"))
