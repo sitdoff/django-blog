@@ -19,7 +19,7 @@ class CustomUser(AbstractUser):
         upload_to=user_directory_path, blank=True, verbose_name="Фотография", default="userpic/default/default.jpg"
     )
     bio = models.TextField(blank=True, verbose_name="О себе")
-    subscriptions = models.ManyToManyField("self", symmetrical=False, related_name="subscribers")
+    subscriptions = models.ManyToManyField("self", symmetrical=False, related_name="subscribers", blank=True)
     is_author = models.BooleanField(default=False, verbose_name="Статус автора")
     is_active = models.BooleanField(default=False, verbose_name="Активен")
     is_banned = models.BooleanField(default=False, verbose_name="Заблокирован")
