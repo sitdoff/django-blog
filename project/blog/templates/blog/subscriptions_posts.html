@@ -18,14 +18,14 @@
                         <div class="blog-post-thumb">
                             {% if post.image %}
                                 <div class="blog-post-image">
-                                    <a href="{% url 'draft' post.slug %}">
+                                    <a href="{{ post.get_absolute_url }}">
                                         <img src="{{ post.image.url }}" class="img-responsive" alt="Blog Image" />
                                     </a>
                                 </div>
                             {% endif %}
                             <div class="blog-post-title">
                                 <h3>
-                                    <a href="{% url 'draft' post.slug %}">{{ post.title }}</a>
+                                    <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
                                 </h3>
                             </div>
                             <div class="blog-post-format">
@@ -35,6 +35,7 @@
                             </div>
                             <div class="blog-post-des">
                                 <p>{{ post.article|safe|truncatewords:100 }}</p>
+                                <a href="{{ post.get_absolute_url }}" class="btn btn-default">Читать</a>
                             </div>
                         </div>
                     {% empty %}
