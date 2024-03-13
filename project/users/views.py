@@ -145,3 +145,40 @@ def subscribe(request: HttpRequest, author_username: str):
         },
         json_dumps_params={"ensure_ascii": False},
     )
+
+
+def unsubscribe(request: HttpRequest, author_username: str):
+    """
+    Remove author in user's subscriptions
+    """
+
+    if request.user.is_anonymous:
+        return JsonResponse(
+            {
+                "message": "Неавторизованные пользователи не могут отписываться",
+                "message_level": settings.MESSAGE_TAGS[messages.ERROR],
+            },
+            json_dumps_params={"ensure_ascii": False},
+        )
+
+    author = get_object_or_404(CustomUser, username=author_username)
+
+    if author not in request.user.subscriptions.all():
+        return JsonResponse(
+            {
+                "message": f"Вы не подписаны на {author}",
+                "message_level": settings.MESSAGE_TAGS[messages.WARNING],
+            },
+            json_dumps_params={"ensure_ascii": False},
+        )
+
+    request.user.subscriptions.remove(author)
+    request.session["subscriptions"].remove(author.username)
+
+    return JsonResponse(
+        {
+            "message": f"Вы отписались от автора {author_username}",
+            "message_level": settings.MESSAGE_TAGS[messages.SUCCESS],
+        },
+        json_dumps_params={"ensure_ascii": False},
+    )
