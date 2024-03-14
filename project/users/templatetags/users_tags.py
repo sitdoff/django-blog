@@ -20,4 +20,4 @@ def subscribe_link(context):
     """
     Adds a link to subscribe
     """
-    return {"author_username": context["post"].author.username}
+    return {"author": context["post"].author, "user": context["user"]}

@@ -41,22 +41,23 @@ class CreateTestUsersAndPostsMixin:
         "published": {"title": "published_post", "is_draft": False, "is_published": True},
     }
 
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         """
         Create users and posts from class's data
         """
 
-        self.test_users = [None]
-        self.test_posts = []
+        cls.test_users = [None]
+        cls.test_posts = []
 
-        for user_data in self.users:
+        for user_data in cls.users:
             user = CustomUser.objects.create(**user_data)
-            self.test_users.append(user)
+            cls.test_users.append(user)
 
         author = CustomUser.objects.get(username="author")
-        for post_data in self.posts:
-            post = Post.objects.create(author=author, **self.posts[post_data])
-            self.test_posts.append(post)
+        for post_data in cls.posts:
+            post = Post.objects.create(author=author, **cls.posts[post_data])
+            cls.test_posts.append(post)
 
 class AccessMixin:
     """

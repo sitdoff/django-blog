@@ -61,8 +61,10 @@ document.addEventListener("DOMContentLoaded", function() {
 // ajax.js
 
 $(document).ready(function() {
-  $("#subscribe-link").click(function(event) {
+  $("#subscribe-link").one("click", function(event) {
     event.preventDefault(); // Предотвращаем стандартное действие ссылки
+
+    var link = this;
 
     // Получаем URL из атрибута data-url
     var url = $(this).data("url");
@@ -72,6 +74,16 @@ $(document).ready(function() {
       url: url, // URL представления
       method: "GET", // Метод запроса (GET, POST и т.д.)
       success: function(data) {
+        // Меняем текс в ссылке
+        if (link.textContent == "Подписаться") {
+          link.textContent = "Вы подписаны";
+          link.id = "none";
+          $(link).attr("href", "###");
+          link.setAttribute("data-url", "#");
+        } else {
+          link.textContent = "Вы подписаны";
+        }
+
         // Создаем родительский контейнер для сообщений и присваиваем ему класс
         var messageDivParent = document.createElement("div");
         messageDivParent.className = "message-container fixed-top";
@@ -94,6 +106,7 @@ $(document).ready(function() {
         $("#message-div").text(message);
         // Показываем div
         $("#message-div").show();
+
         setTimeout(function() {
           // Скрываем и удаляем элемент
           messageDivParent.style.display = "none";

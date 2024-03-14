@@ -1,5 +1,9 @@
 <div>
-    <a href="#"
-       id="subscribe-link"
-       data-url="{% url 'users:subscribe' author_username %}">Подписаться</a>
+    {% if author in user.subscriptions.all %}
+        <a href="#" id="none" data-url="#">Вы подписаны</a>
+    {% else %}
+        <a href="#"
+           id="subscribe-link"
+           data-url="{% url 'users:subscribe' author.username %}">Подписаться</a>
+    {% endif %}
 </div>
