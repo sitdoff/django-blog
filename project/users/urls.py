@@ -17,4 +17,5 @@ urlpatterns = [
     path("author/<str:username>", views.AuthorPosts.as_view(), name="author_posts"),
     path("profile", views.EditProfileUser.as_view(), name="profile_edit"),
     path("subscribe/<str:author_username>", views.subscribe, name="subscribe"),
+    path("unsubscribe/<str:author_username>", views.unsubscribe, name="unsubscribe"),
 ]

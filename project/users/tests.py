@@ -394,7 +394,26 @@ class TestUnsubscribe(CreateTestUsersAndPostsMixin, TestCase):
     Test unsubscriptions for authors.
     """
 
-    def get_request(self, user: CustomUser | AnonymousUser):
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Create users
+        """
+        for user_data in cls.users:
+            CustomUser.objects.create(**user_data)
+
+    @classmethod
+    def setUpClass(cls):
+        """
+        Assigns a value to class attributes.
+        """
+        super().setUpClass()
+
+        cls.user = CustomUser.objects.get(username="user")
+        cls.author = CustomUser.objects.get(username="author")
+
+    @staticmethod
+    def get_request(user: CustomUser | AnonymousUser):
         """
         Create request
         """
@@ -406,7 +425,7 @@ class TestUnsubscribe(CreateTestUsersAndPostsMixin, TestCase):
         if not isinstance(user, AnonymousUser):
             middleware = SessionMiddleware(lambda request: None)
             middleware.process_request(request)
-            request.session["subscriptions"] = []
+            request.session["subscriptions"] = ["author"]
             request.session.save()
 
             middleware = MessageMiddleware(lambda request, response: None)
@@ -414,90 +433,72 @@ class TestUnsubscribe(CreateTestUsersAndPostsMixin, TestCase):
 
         return request
 
+    def setUp(self):
+        self.user.subscriptions.add(self.author)
+        self.request = self.get_request(self.user)
+
     def test_unsubscribe_function_if_username_is_owned_by_author(self):
         """
         Tests the "unsubscribe" function if the author_username is owned by the author.
         """
 
-        user = CustomUser.objects.get(username="user")
-        author = CustomUser.objects.get(username="author")
-
-        request = self.get_request(user)
-
-        response = subscribe(request, author.username)
+        response = unsubscribe(self.request, self.author.username)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(user.subscriptions.count(), 1)
-        self.assertIn(author, user.subscriptions.all())
-        self.assertEqual(request.session["subscriptions"], [author.username])
-
-        response = unsubscribe(request, author.username)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(user.subscriptions.count(), 0)
-        self.assertNotIn(author, user.subscriptions.all())
+        self.assertEqual(self.user.subscriptions.count(), 0)
+        self.assertNotIn(self.author, self.user.subscriptions.all())
         json_response = json.loads(response.content)
         self.assertIn("message", json_response)
-        self.assertEqual(json_response["message"], f"Вы отписались от автора {author.username}")
+        self.assertEqual(json_response["message"], f"Вы отписались от автора {self.author.username}")
         self.assertNotEqual(json_response["message"], "Неавторизованные пользователи не могут отписываться")
-        self.assertNotEqual(json_response["message"], f"Вы не подписаны на {author}")
-        self.assertNotEqual(request.session["subscriptions"], [author.username])
-        self.assertEqual(request.session["subscriptions"], [])
+        self.assertNotEqual(json_response["message"], f"Вы не подписаны на {self.author}")
+        self.assertNotEqual(self.request.session["subscriptions"], [self.author.username])
+        self.assertEqual(self.request.session["subscriptions"], [])
 
     def test_unsubscribe_function_if_username_is_not_owned_by_author(self):
         """
         Tests the "unsubscribe" function if the author_username is't owned by the author.
         """
 
-        user = CustomUser.objects.get(username="user")
         not_author = CustomUser.objects.get(username="staff")
 
-        request = self.get_request(user)
-
-        response = unsubscribe(request, not_author.username)
+        response = unsubscribe(self.request, not_author.username)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(user.subscriptions.count(), 0)
-        self.assertNotIn(not_author, user.subscriptions.all())
+        self.assertNotIn(not_author, self.user.subscriptions.all())
         json_response = json.loads(response.content)
         self.assertIn("message", json_response)
         self.assertEqual(json_response["message"], f"Вы не подписаны на {not_author}")
         self.assertNotEqual(json_response["message"], f"Вы отписались от автора {not_author.username}")
         self.assertNotEqual(json_response["message"], "Неавторизованные пользователи не могут отписываться")
-        self.assertEqual(request.session["subscriptions"], [])
+        self.assertEqual(self.request.session["subscriptions"], ["author"])
 
     def test_unsubscribe_function_if_username_does_not_exist(self):
         """
         Tests the "unsubscribe" function if the author_username dosen't exist
         """
 
-        user = CustomUser.objects.get(username="user")
         do_not_exist = "super_author"
 
-        request = self.get_request(user)
-
         with self.assertRaises(Http404):
-            unsubscribe(request, do_not_exist)
-        self.assertEqual(request.session["subscriptions"], [])
+            unsubscribe(self.request, do_not_exist)
+        self.assertEqual(self.request.session["subscriptions"], ["author"])
 
     def test_unsubscribe_function_if_username_does_not_in_subscriptions(self):
         """
         Tests the "unsubscribe" function if the author_username does not in user's subscriptions.
         """
+        self.user.subscriptions.remove(self.author)
+        self.request.session["subscriptions"].remove(self.author.username)
 
-        user = CustomUser.objects.get(username="user")
-        author = CustomUser.objects.get(username="author")
-        self.assertNotIn(author, user.subscriptions.all())
-
-        request = self.get_request(user)
-
-        response = unsubscribe(request, author.username)
+        response = unsubscribe(self.request, self.author.username)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(user.subscriptions.count(), 0)
-        self.assertNotIn(author, user.subscriptions.all())
+        self.assertEqual(self.user.subscriptions.count(), 0)
+        self.assertNotIn(self.author, self.user.subscriptions.all())
         json_response = json.loads(response.content)
         self.assertIn("message", json_response)
-        self.assertEqual(json_response["message"], f"Вы не подписаны на {author}")
-        self.assertNotEqual(json_response["message"], f"Вы отписались от автора {author.username}")
+        self.assertEqual(json_response["message"], f"Вы не подписаны на {self.author}")
+        self.assertNotEqual(json_response["message"], f"Вы отписались от автора {self.author.username}")
         self.assertNotEqual(json_response["message"], "Неавторизованные пользователи не могут отписываться")
-        self.assertEqual(request.session["subscriptions"], [])
+        self.assertEqual(self.request.session["subscriptions"], [])
 
     def test_unsubscribe_function_if_user_is_anonymous(self):
         """
@@ -505,14 +506,55 @@ class TestUnsubscribe(CreateTestUsersAndPostsMixin, TestCase):
         """
 
         user = AnonymousUser()
-        author = CustomUser.objects.get(username="author")
 
         request = self.get_request(user)
 
-        response = unsubscribe(request, author.username)
+        response = unsubscribe(request, self.author.username)
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.content)
         self.assertIn("message", json_response)
         self.assertEqual(json_response["message"], "Неавторизованные пользователи не могут отписываться")
-        self.assertNotEqual(json_response["message"], f"Вы не подписаны на {author}")
-        self.assertNotEqual(json_response["message"], f"Вы отписались от автора {author.username}")
+        self.assertNotEqual(json_response["message"], f"Вы не подписаны на {self.author}")
+        self.assertNotEqual(json_response["message"], f"Вы отписались от автора {self.author.username}")
+
+    def test_unsubscribe_by_url_if_username_is_owned_by_author(self):
+        """
+        Testing a unsubscription to the author.
+        """
+
+        self.assertEqual(self.user.subscriptions.count(), 1)
+        self.assertIn(self.author, self.user.subscriptions.all())
+
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("users:unsubscribe", kwargs={"author_username": self.author.username}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.user.subscriptions.count(), 0)
+        self.assertNotIn(self.author, self.user.subscriptions.all())
+
+    def test_unsubscribe_by_url_if_username_is_not_owned_by_author(self):
+        """
+        Testing a unsubscription not to the author.
+        """
+        self.assertEqual(self.user.subscriptions.count(), 1)
+        self.assertIn(self.author, self.user.subscriptions.all())
+
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("users:unsubscribe", kwargs={"author_username": self.author.username}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.user.subscriptions.count(), 0)
+        self.assertNotIn(self.author, self.user.subscriptions.all())
+
+    def test_delete_subscribe_data_in_session_when_common_user_unsubscribe_by_url(self):
+        """
+        Test deleting data to a session when a common user tries to unsubscribe to the author.
+        """
+        self.assertEqual(self.user.subscriptions.count(), 1)
+        self.assertIn(self.author, self.user.subscriptions.all())
+
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("users:unsubscribe", kwargs={"author_username": self.author.username}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.client.session.get("subscriptions"), [])

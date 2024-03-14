@@ -174,6 +174,7 @@ def unsubscribe(request: HttpRequest, author_username: str):
 
     request.user.subscriptions.remove(author)
     request.session["subscriptions"].remove(author.username)
+    request.session.save()
 
     return JsonResponse(
         {
