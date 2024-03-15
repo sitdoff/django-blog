@@ -8,7 +8,7 @@ __pycache__/
 .flake8
 .prettierrc.toml
 .pylintrc
-project/media/images/*
+!project/media/images/2024/*
 project/media/user_admin/
 project/media/userpic/
 !project/media/images/gallery-image*.jpg
