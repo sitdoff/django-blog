@@ -108,4 +108,4 @@ class EditStaffPostForm(forms.ModelForm):
     class Meta(AddPostForm.Meta):
         """Metadata"""
 
-        fields = ("title", "epigraph", "article", "image", "is_published", "status")
+        fields = ("title", "epigraph", "article", "image", "status")
