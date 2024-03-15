@@ -1,6 +1,8 @@
-<div>
+<div class="subscribe-unsubscribe">
     {% if author in user.subscriptions.all %}
-        <a href="#" id="none" data-url="#">Вы подписаны</a>
+        <a href="#"
+           id="unsubscribe-link"
+           data-url="{% url 'users:unsubscribe' author.username %}">Отписаться</a>
     {% else %}
         <a href="#"
            id="subscribe-link"
