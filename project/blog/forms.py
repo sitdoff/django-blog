@@ -109,3 +109,20 @@ class EditStaffPostForm(forms.ModelForm):
         """Metadata"""
 
         fields = ("title", "epigraph", "article", "image", "status")
+
+
+class FeedbackForm(forms.Form):
+    name = forms.CharField(
+        required=True, widget=forms.TextInput(attrs={"id": "name", "class": "form-control", "placeholder": "Name"})
+    )
+    email = forms.EmailField(
+        required=True, widget=forms.TextInput(attrs={"id": "email", "class": "form-control", "placeholder": "Email"})
+    )
+    subject = forms.CharField(
+        required=True,
+        widget=forms.TextInput(attrs={"id": "subject", "class": "form-control", "placeholder": "Subject"}),
+    )
+    message = forms.CharField(
+        required=True,
+        widget=forms.Textarea(attrs={"id": "message", "class": "form-control", "rows": 5, "placeholder": "Message"}),
+    )
