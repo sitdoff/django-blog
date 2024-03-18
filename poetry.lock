@@ -1028,6 +1028,16 @@ socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
 zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
+name = "uwsgi"
+version = "2.0.24"
+description = "The uWSGI server"
+optional = false
+python-versions = "*"
+files = [
+    {file = "uwsgi-2.0.24.tar.gz", hash = "sha256:77b6dd5cd633f4ae87ee393f7701f617736815499407376e78f3d16467523afe"},
+]
+
+[[package]]
 name = "vine"
 version = "5.1.0"
 description = "Python promises."
@@ -1069,4 +1079,4 @@ watchdog = ["watchdog (>=2.3)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "d6aa60bc5c33218b371f291a10731ad8d14a705311f4d969a786233729417f8b"
+content-hash = "784f2b54533461917249b8248c64e9120bfc1139c3a7e43b5596e1874252db7b"

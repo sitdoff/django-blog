@@ -41,6 +41,7 @@ python-slugify = "8.0.1"
 pillow = "10.1"
 redis = "^5.0.1"
 celery = "^5.3.6"
+uwsgi = "^2.0.24"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -7,12 +7,13 @@ ENV PYTHONUNBUFFERED=1
 ENV POETRY_VERSION=1.6.1
 RUN pip install --no-cache-dir "poetry==$POETRY_VERSION"
 WORKDIR /code
-COPY poetry.lock pyproject.toml wait-for-it.sh entrypoint.sh .env /code/
+COPY poetry.lock pyproject.toml wait-for-it.sh entrypoint.sh .env uwsgi.ini /code/
 # RUN poetry config virtualenvs.create false && poetry install
 RUN poetry config virtualenvs.create false && poetry install && chmod +x /code/entrypoint.sh
 COPY ./project/ /code/
-ENTRYPOINT [ "./entrypoint.sh", "python3", "manage.py", "runserver", "0.0.0.0:8000"]
+# ENTRYPOINT [ "./entrypoint.sh", "python3", "manage.py", "runserver", "0.0.0.0:8000"]
 # CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["uwsgi", "--ini", "uwsgi.ini"]
 
 
 # RUN poetry config virtualenvs.create false && poetry install --only main
