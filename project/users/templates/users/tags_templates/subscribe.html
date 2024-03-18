@@ -1,11 +1,13 @@
-<div class="subscribe-unsubscribe">
-    {% if author in user.subscriptions.all %}
-        <a href="#"
-           id="unsubscribe-link"
-           data-url="{% url 'users:unsubscribe' author.username %}">Отписаться</a>
-    {% else %}
-        <a href="#"
-           id="subscribe-link"
-           data-url="{% url 'users:subscribe' author.username %}">Подписаться</a>
-    {% endif %}
-</div>
+{% if user.is_authenticated %}
+    <div class="subscribe-unsubscribe">
+        {% if author in user.subscriptions.all %}
+            <a href="#"
+               id="unsubscribe-link"
+               data-url="{% url 'users:unsubscribe' author.username %}">Отписаться</a>
+        {% else %}
+            <a href="#"
+               id="subscribe-link"
+               data-url="{% url 'users:subscribe' author.username %}">Подписаться</a>
+        {% endif %}
+    </div>
+{% endif %}
