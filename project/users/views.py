@@ -156,7 +156,7 @@ def unsubscribe(request: HttpRequest, author_username: str):
         return JsonResponse(
             {
                 "message": "Неавторизованные пользователи не могут отписываться",
-                "message_level": settings.MESSAGE_TAGS[messages.ERROR],
+                "message_level": settings.MESSAGE_TAGS[messages.WARNING],
             },
             json_dumps_params={"ensure_ascii": False},
         )
