@@ -17,8 +17,9 @@ import django_stubs_ext
 from django.contrib.messages import constants as messages
 from dotenv import load_dotenv
 
-django_stubs_ext.monkeypatch()
 from .ckeditor_config import CKEDITOR_CONFIGS
+
+django_stubs_ext.monkeypatch()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,6 +37,10 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
+ADMINS = [
+    ("admin", os.getenv("SUPERUSER_EMAIL")),
+]
 
 # TODO uncomment this
 # INTERNAL_IPS = [

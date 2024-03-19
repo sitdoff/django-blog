@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.template.response import TemplateResponse
 from django.urls import reverse, reverse_lazy
 from django.views.decorators.http import require_POST
@@ -18,9 +18,10 @@ from users.mixins import (
     IsStaffRequiredMixin,
 )
 
-from .forms import AddPostForm, EditStaffPostForm
+from .forms import AddPostForm, EditStaffPostForm, FeedbackForm
 from .mixins import TitleMixin
 from .models import Post
+from .tasks import send_feedback_task
 
 # Create your views here.
 
@@ -271,6 +272,15 @@ def gallery(request):
     return TemplateResponse(request, "blog/gallery.html")
 
 
-def contact(request):
-    """Page contact view"""
-    return TemplateResponse(request, "blog/contact.html")
+def contact(request: HttpRequest) -> HttpResponse:
+    """
+    Page contact view
+    """
+    if request.method == "POST":
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            send_feedback_task.delay(form.cleaned_data)
+            return TemplateResponse(request, "blog/feedback_done.html")
+    else:
+        form = FeedbackForm()
+    return render(request, "blog/contact.html", context={"form": form})
