@@ -1,0 +1,20 @@
+{% extends "blog/base.html" %}
+
+{% load blog_tags %}
+
+{% load users_tags %}
+
+{% block title %}
+    Сообщение отправлено
+{% endblock title %}
+
+{% block content %}
+    <section id="blog">
+        <div class="container" align="center">
+            <div class="blog-comment-form">
+                <h2>Спасибо!</h2>
+                <p>Ваше сообщение отправлено.</p>
+            </div>
+        </div>
+    </section>
+{% endblock content %}

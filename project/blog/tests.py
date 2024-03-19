@@ -1,17 +1,22 @@
+from unittest.mock import patch
+
 from blog.models import Post
+from django.conf import settings
+from django.contrib.sessions.middleware import SessionMiddleware
 from django.core import mail
 from django.shortcuts import reverse
 from django.template.loader import render_to_string
-from django.test import TestCase, RequestFactory
+from django.test import RequestFactory, TestCase
 from slugify import slugify
 from users.models import CustomUser
-from django.contrib.sessions.middleware import SessionMiddleware
 
+from .forms import FeedbackForm
 from .utils import (
+    send_feedback,
     send_mail_your_post_has_been_published,
     send_mail_your_post_has_been_returned,
 )
-from .views import SubscriptionsView
+from .views import SubscriptionsView, contact
 
 # Create your tests here.
 
@@ -838,5 +843,122 @@ class TestSubscriptionsView(CreateTestUsersAndPostsMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         for post in author.author_posts.filter(is_published=True)[:5]:
             self.assertIn(post.title, response.content.decode('utf-8'))
+
+
+class TestFeedback(TestCase):
+    """
+    Test Feedback
+    """
+    def setUp(self):
+        """
+        Setup request_factory
+        """
+        self.request_factory = RequestFactory()
+    
+    def test_feedback_form(self):
+        """
+        Test the feedback form
+        """
+        # All data is valid
+        form_data = {"name": "user", "email": "user@mail.com", "subject": "Test subject", "message": "Test message"}
+        form = FeedbackForm(form_data)
+        self.assertTrue(form.is_valid())
+
+        # Email data is invalid
+        form_data = {"name": "user", "email": "user", "subject": "Test subject", "message": "Test message"}
+        form = FeedbackForm(form_data)
+        self.assertFalse(form.is_valid())
+
+    def test_send_feedback_function(self):
+        """
+        Test the send_feedback function
+        """
+        data = {"name": "user", "email": "user@mail.com", "subject": "Test subject", "message": "Test message"}
+        send_feedback(data)
+        self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[0]
+        self.assertEqual(email.from_email, data['email'])
+        self.assertEqual(email.to, [settings.ADMINS[0][1]])
+        self.assertEqual(email.subject, f"{data["name"]} отправил вам письмо через форму обратной связи")
+        self.assertIn(f'От {data["name"]}({data["email"]})', email.body)
+        self.assertIn(f'Тема: {data["subject"]}', email.body)
+        self.assertIn(f'{data["message"]}', email.body)
+
+    def test_feedback_function_without_data(self):
+        """
+        Test the feedback view function without data
+        """
+        request = self.request_factory.get("/contact")
+
+        response = contact(request)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('<input type="text" name="name" id="name" class="form-control" placeholder="Name" required>', response.content.decode("utf-8"))
+        self.assertIn('<input type="text" name="email" id="email" class="form-control" placeholder="Email" maxlength="320" required>', response.content.decode("utf-8"))
+        self.assertIn('<input type="text" name="subject" id="subject" class="form-control" placeholder="Subject" required>', response.content.decode("utf-8"))
+        self.assertIn('<textarea name="message" cols="40" rows="5" id="message" class="form-control" placeholder="Message" required>\n</textarea>', response.content.decode("utf-8"))
+
+    def test_feedback_function_with_invalid_data(self):
+        """
+        Test the feedback view function with incorrect email
+        """
+
+        form_data = {"name": "user", "email": "user", "subject": "Test subject", "message": "Test message"}
+        request = self.request_factory.post("/contact", form_data)
+
+        response = contact(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Введите правильный адрес электронной почты.", response.content.decode("utf-8"))
+        
+    def test_feedback_function_with_valid_data(self):
+        """
+        Test the feedback view function with valid data
+        """
+
+        form_data = {"name": "user", "email": "user@mail.com", "subject": "Test subject", "message": "Test message"}
+        request = self.request_factory.post("/contact", form_data)
+
+        with patch("blog.tasks.send_feedback_task.delay") as mock_send_feedback_task:
+            response = contact(request)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.template_name, "blog/feedback_done.html")
+            mock_send_feedback_task.assert_called_once()
+            mock_send_feedback_task.assert_called_once_with({"name": "user", "email": "user@mail.com", "subject": "Test subject", "message": "Test message"})
+
+    def test_feedback_view_get_method(self):
+        """
+        Test the feedback view, method GET
+        """
+        response = self.client.get(reverse("contact"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "blog/contact.html")
+        self.assertIn("form", response.context)
+        self.assertIsInstance(response.context["form"], FeedbackForm)
+
+    def test_feedback_view_post_method_with_invalid_data(self):
+        """
+        Test the feedback view, method POST, invalid data
+        """
+        form_data = {"name": "user", "email": "user", "subject": "Test subject", "message": "Test message"}
+
+        response = self.client.post(reverse("contact"), data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "blog/contact.html")
+        self.assertIn("form", response.context)
+        self.assertIsInstance(response.context["form"], FeedbackForm)
+        self.assertIn("Введите правильный адрес электронной почты.", response.content.decode("utf-8"))
+
+    def test_feedback_view_post_method_with_valid_data(self):
+        """
+        Test the feedback view, method POST, valid data
+        """
+        form_data = {"name": "user", "email": "user@mail.com", "subject": "Test subject", "message": "Test message"}
+
+        response = self.client.post(reverse("contact"), data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "blog/feedback_done.html")
+        self.assertIn("Сообщение отправлено", response.content.decode("utf-8"))
+
+
 
     
