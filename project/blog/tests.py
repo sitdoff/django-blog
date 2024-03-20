@@ -1,6 +1,5 @@
 from unittest.mock import patch
 
-from blog.models import Post
 from django.conf import settings
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core import mail
@@ -8,6 +7,8 @@ from django.shortcuts import reverse
 from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase
 from slugify import slugify
+
+from blog.models import Post
 from users.models import CustomUser
 
 from .forms import FeedbackForm
