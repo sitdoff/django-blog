@@ -27,3 +27,4 @@ note
 /project/wait-for-it.sh
 /project/fixture.json
 migrations/
+/backups
