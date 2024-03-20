@@ -22,6 +22,9 @@ services:
             context: .
             dockerfile: ./celery/Dockerfile
         command: celery -A neuron worker -l info
+        volumes:
+            - ./emails:/code/emails
+
         depends_on:
             - db
             - redis
@@ -42,6 +45,7 @@ services:
             dockerfile: ./project/Dockerfile
         entrypoint: ./entrypoint.sh uwsgi --ini uwsgi.ini
         volumes:
+            - ./project/:/code
             - static:/code/static
             - media:/code/media
         expose:
