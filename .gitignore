@@ -26,5 +26,8 @@ note
 /project/entrypoint.sh
 /project/wait-for-it.sh
 /project/fixture.json
+/project/poetry.lock
+/project/pyproject.toml
+/project/uwsgi.ini
 migrations/
 /backups
