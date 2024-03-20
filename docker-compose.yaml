@@ -6,25 +6,22 @@ services:
             POSTGRES_USER: ${POSTGRES_USER}
             POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
         volumes:
-            - ~/Документы/docker/postgres_data/neuron:/var/lib/postgresql/data/
+            - postgres_data:/var/lib/postgresql/data/
         ports:
             - 5432:5432
 
     redis:
         image: redis:7.2.4-bookworm
         volumes:
-            - ~/Документы/docker/redis_data/neuron:/data/
+            - redis_data:/data/
         ports:
             - 6379:6379
 
     celery:
         build:
-            dockerfile: Dockerfile.celery
+            context: .
+            dockerfile: ./celery/Dockerfile
         command: celery -A neuron worker -l info
-        volumes:
-            # - ./project:/code
-            - ./emails:/code/emails
-
         depends_on:
             - db
             - redis
@@ -42,16 +39,30 @@ services:
     web:
         build:
             context: .
-            dockerfile: Dockerfile
-            args:
-                BUILD_NO_CACHE: 1
-        # command: python manage.py runserver 0.0.0.0:8000
+            dockerfile: ./project/Dockerfile
         entrypoint: ./entrypoint.sh uwsgi --ini uwsgi.ini
-        # volumes:
-        #     - ./project:/code
-        ports:
-            - "8000:8000"
+        volumes:
+            - static:/code/static
+            - media:/code/media
+        expose:
+            - 8000
         depends_on:
             - db
             - redis
             - celery
+
+    nginx:
+        build: ./nginx
+        volumes:
+            - static:/code/static
+            - media:/code/media
+        ports:
+            - 8000:80
+        depends_on:
+            - web
+
+volumes:
+    static:
+    media:
+    postgres_data:
+    redis_data:
