@@ -6,7 +6,7 @@ reportIncompatibleVariableOverride = false
 plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
 
 [tool.django-stubs]
-django_settings_module = "neuron.settings"
+django_settings_module = "project.neuron.settings"
 
 [tool.black]
 line-length = 120
@@ -41,6 +41,7 @@ python-slugify = "8.0.1"
 pillow = "10.1"
 redis = "^5.0.1"
 celery = "^5.3.6"
+uwsgi = "^2.0.24"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -50,6 +51,9 @@ werkzeug = "^3.0.1"
 django-stubs = {extras = ["compatible-mypy"], version = "^4.2.7"}
 django-stubs-ext = "^4.2.5"
 djangorestframework-stubs = {extras = ["compatible-mypy"], version = "^3.14.5"}
+django-types = "^0.19.1"
+djangorestframework-types = "^0.8.0"
+types-python-slugify = "^8.0.2.20240310"
 
 [build-system]
 requires = ["poetry-core"]

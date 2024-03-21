@@ -1,6 +1,5 @@
 from unittest.mock import patch
 
-from blog.models import Post
 from django.conf import settings
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core import mail
@@ -8,7 +7,6 @@ from django.shortcuts import reverse
 from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase
 from slugify import slugify
-from users.models import CustomUser
 
 from .forms import FeedbackForm
 from .utils import (
@@ -17,6 +15,9 @@ from .utils import (
     send_mail_your_post_has_been_returned,
 )
 from .views import SubscriptionsView, contact
+from blog.models import Post
+from users.models import CustomUser
+
 
 # Create your tests here.
 
@@ -64,6 +65,7 @@ class CreateTestUsersAndPostsMixin:
             post = Post.objects.create(author=author, **cls.posts[post_data])
             cls.test_posts.append(post)
 
+
 class AccessMixin:
     """
     Mixin сontains methods for testing status codes for a specific URL.
@@ -80,7 +82,8 @@ class AccessMixin:
         admin_status_code,
     ):
         """
-        Makes a GET request to the specified URL on behalf of all users and compares the response status code with the specified one.
+        Makes a GET request to the specified URL on behalf of all users
+        and compares the response status code with the specified one.
         """
 
         self.client.logout()
@@ -167,7 +170,6 @@ class TestBlog(CreateTestUsersAndPostsMixin, AccessMixin, TestCase):
             "admin_status_code": 200,
         }
         self.access_test_with_all_users(**test_data)
-
 
 
 class TestAddPostView(TestCase):
@@ -338,7 +340,6 @@ class TestEditDraftPostView(CreateTestUsersAndPostsMixin, AccessMixin, TestCase)
             "admin_status_code": 200,
         }
         self.access_test_with_all_users(**test_data)
-
 
     def test_save_draft_as_draft(self):
         """
@@ -879,7 +880,7 @@ class TestFeedback(TestCase):
         email = mail.outbox[0]
         self.assertEqual(email.from_email, data['email'])
         self.assertEqual(email.to, [settings.ADMINS[0][1]])
-        self.assertEqual(email.subject, f"{data["name"]} отправил вам письмо через форму обратной связи")
+        self.assertEqual(email.subject, f'{data["name"]} отправил вам письмо через форму обратной связи')
         self.assertIn(f'От {data["name"]}({data["email"]})', email.body)
         self.assertIn(f'Тема: {data["subject"]}', email.body)
         self.assertIn(f'{data["message"]}', email.body)

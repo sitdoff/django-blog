@@ -1,5 +1,3 @@
-from comments.forms import CommentForm
-from comments.models import Comment
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -12,6 +10,9 @@ from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, UpdateView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
+
+from comments.forms import CommentForm
+from comments.models import Comment
 from users.mixins import (
     IsAuthorDraftRequiredMixin,
     IsAuthorRequiredMixin,

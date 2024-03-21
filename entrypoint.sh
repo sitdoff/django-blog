@@ -5,12 +5,18 @@ set -e
 # Ожидание доступности базы данных
 ./wait-for-it.sh db:5432 -t 60 -- echo "PostgreSQL is ready"
 
-# Применение миграций, если это необходимо.
+# Собираем статичные файлы в одно место
+python manage.py collectstatic --noinput
+
+# Применение миграций, если это необходимо
 python manage.py makemigrations
 python manage.py migrate
+
+# Создание суперпользователя
 python manage.py admininit
-python manage.py loaddata example_fixture.json # Внесение демонстрационных данных
 
+# Внесение демонстрационных данных
+python manage.py loaddata example_fixture.json
 
-# Запуск вашего Django приложения
+# Запуск Django приложения
 exec "$@"
