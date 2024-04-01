@@ -1,7 +1,10 @@
+from typing import Any
+
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.messages.views import SuccessMessageMixin
+from django.db.models import Model
+from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.template.response import TemplateResponse
@@ -12,7 +15,6 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
 from comments.forms import CommentForm
-from comments.models import Comment
 from users.mixins import (
     IsAuthorDraftRequiredMixin,
     IsAuthorRequiredMixin,
@@ -22,6 +24,7 @@ from users.mixins import (
 from .forms import AddPostForm, EditStaffPostForm, FeedbackForm
 from .mixins import TitleMixin
 from .models import Post
+from .redis_services import increase_post_views
 from .tasks import send_feedback_task
 
 # Create your views here.
@@ -142,6 +145,19 @@ class PostDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context["form"] = form
         return self.render_to_response(context=context)
+
+    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        """
+        Increases the number of views if there are no cookies. Sets the cookie if it does not exist.
+        """
+        response: HttpResponse = super().get(request, *args, **kwargs)
+        object_instance = self.get_object()
+        cookie_name = "post_view_" + str(object_instance.pk)
+        if cookie_name not in self.request.COOKIES:
+            increase_post_views(object_instance)
+            response.set_cookie(cookie_name, "true", max_age=3600 * 24 * 30 * 12)
+
+        return response
 
 
 class UnpublishedPostDetailView(IsStaffRequiredMixin, PostDetailView):
