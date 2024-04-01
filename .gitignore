@@ -31,3 +31,4 @@ note
 /project/uwsgi.ini
 migrations/
 /backups
+.null-ls*
