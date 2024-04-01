@@ -73,6 +73,7 @@
                                 {% author_info post.author %}
                                 <span><i class="fa fa-date"></i>{{ post.time_update }}</span>
                                 <!-- <span><a href="#"><i class="fa fa-comment-o"></i> 35 Comments</a></span> -->
+                                <span><i class="fa"></i>Просмотров: {{ post.get_views }}</span>
                             </div>
                             <div class="blog-post-des">
                                 <p>{{ post.article|safe|truncatewords:100 }}</p>

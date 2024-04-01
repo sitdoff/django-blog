@@ -8,6 +8,9 @@ from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase
 from slugify import slugify
 
+from blog.models import Post
+from users.models import CustomUser
+
 from .forms import FeedbackForm
 from .utils import (
     send_feedback,
@@ -15,9 +18,6 @@ from .utils import (
     send_mail_your_post_has_been_returned,
 )
 from .views import SubscriptionsView, contact
-from blog.models import Post
-from users.models import CustomUser
-
 
 # Create your tests here.
 
@@ -959,6 +959,7 @@ class TestFeedback(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "blog/feedback_done.html")
         self.assertIn("Сообщение отправлено", response.content.decode("utf-8"))
+
 
 
 

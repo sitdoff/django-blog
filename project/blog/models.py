@@ -1,9 +1,11 @@
 from ckeditor_uploader.fields import RichTextUploadingField
-from comments.models import Comment
 from django.db import models
 from django.urls import reverse
 from slugify import slugify
 
+from comments.models import Comment
+
+from .redis_services import get_post_views
 from .utils import slug_replacements
 
 # Create your models here.
@@ -42,6 +44,12 @@ class Post(models.Model):
     def get_comments(self):
         """Returns comments"""
         return Comment.objects.filter(post=self.pk, is_published=True).select_related()
+
+    def get_views(self):
+        """
+        Rerurns views
+        """
+        return get_post_views(self)
 
     def save(self, *args, **kwargs):
         """Add custom slug"""

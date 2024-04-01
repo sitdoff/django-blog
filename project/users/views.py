@@ -1,5 +1,3 @@
-from blog.mixins import TitleMixin
-from blog.models import Post
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login
@@ -11,6 +9,9 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
 from django.views.generic.list import ListView
+
+from blog.mixins import TitleMixin
+from blog.models import Post
 
 from .forms import RegisterUserForm
 from .mixins import IsAuthorRequiredMixin
