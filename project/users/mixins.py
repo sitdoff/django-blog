@@ -1,5 +1,8 @@
+from typing import Any
+
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import AnonymousUser
+from django.db import models
 from django.http.request import HttpRequest
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
@@ -7,18 +10,12 @@ from django.urls import reverse_lazy
 from .models import CustomUser
 
 
-class TypecheckHttpRequest(HttpRequest):
-    """Clacc for good typechecking"""
-
-    user: CustomUser | AnonymousUser
-
-
 class IsAuthorRequiredMixin(PermissionRequiredMixin):
     """Verify that the current user has author permissions."""
 
     redirect_field_name = "next"
     login_url = reverse_lazy("users:login")
-    request: TypecheckHttpRequest
+    request: HttpRequest
 
     def has_permission(self) -> bool:
         """Returns True or False depending on the user's status."""
@@ -36,7 +33,7 @@ class IsStaffRequiredMixin(PermissionRequiredMixin):
 
     redirect_field_name = "next"
     login_url = reverse_lazy("users:login")
-    request: TypecheckHttpRequest
+    request: HttpRequest
 
     def has_permission(self) -> bool:
         """Returns True or False depending on the user's status."""
@@ -54,7 +51,9 @@ class IsAuthorDraftRequiredMixin(PermissionRequiredMixin):
 
     redirect_field_name = "next"
     login_url = reverse_lazy("users:login")
-    request: TypecheckHttpRequest
+    request: HttpRequest
+    kwargs: dict
+    model: Any
 
     def has_permission(self) -> bool:
         """Returns True or False depending on the user's status."""
