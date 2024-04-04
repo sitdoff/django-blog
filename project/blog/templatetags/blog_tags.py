@@ -8,6 +8,7 @@ navigation_menu = [
     {"title": "Обо мне", "url_name": "about"},
     {"title": "Галлерея", "url_name": "gallery"},
     {"title": "Контакты", "url_name": "contact"},
+    {"title": "Поиск", "url_name": "search"},
 ]
 
 

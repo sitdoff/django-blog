@@ -3,6 +3,7 @@ from typing import Any
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.postgres.search import SearchVector
 from django.db.models import Model
 from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
@@ -21,7 +22,7 @@ from users.mixins import (
     IsStaffRequiredMixin,
 )
 
-from .forms import AddPostForm, EditStaffPostForm, FeedbackForm
+from .forms import AddPostForm, EditStaffPostForm, FeedbackForm, SearchForm
 from .mixins import TitleMixin
 from .models import Post
 from .redis_services import increase_post_views
@@ -301,3 +302,15 @@ def contact(request: HttpRequest) -> HttpResponse:
     else:
         form = FeedbackForm()
     return render(request, "blog/contact.html", context={"form": form})
+
+
+def search(request: HttpRequest) -> HttpResponse:
+    if request.method == "GET":
+        form = SearchForm(request.GET)
+        if form.is_valid():
+            posts = Post.objects.annotate(search=SearchVector("title", "article")).filter(
+                search=request.GET["text"], is_published=True, is_draft=False
+            )
+            return render(request, "blog/search.html", context={"form": form, "posts": posts})
+    form = SearchForm()
+    return render(request, "blog/search.html", context={"form": form})
