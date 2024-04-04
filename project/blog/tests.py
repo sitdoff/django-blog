@@ -3,21 +3,23 @@ from unittest.mock import patch
 from django.conf import settings
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core import mail
+from django.http import HttpResponse
 from django.shortcuts import reverse
 from django.template.loader import render_to_string
+from django.template.response import TemplateResponse
 from django.test import RequestFactory, TestCase
 from slugify import slugify
 
 from blog.models import Post
 from users.models import CustomUser
 
-from .forms import FeedbackForm
+from .forms import FeedbackForm, SearchForm
 from .utils import (
     send_feedback,
     send_mail_your_post_has_been_published,
     send_mail_your_post_has_been_returned,
 )
-from .views import SubscriptionsView, contact
+from .views import SubscriptionsView, contact, search
 
 # Create your tests here.
 
@@ -118,6 +120,7 @@ class TestBlog(CreateTestUsersAndPostsMixin, AccessMixin, TestCase):
         "about": {"url": "/about", "kwargs": {}},
         "gallery": {"url": "/gallery", "kwargs": {}},
         "contact": {"url": "/contact", "kwargs": {}},
+        "search": {"url": "/search", "kwargs": {}},
         "users:register": {"url": "/user/register", "kwargs": {}},
         "users:login": {"url": "/user/login", "kwargs": {}},
         "users:author_posts": {"url": "/user/author/author", "kwargs": {"username": "author"}},
@@ -137,7 +140,7 @@ class TestBlog(CreateTestUsersAndPostsMixin, AccessMixin, TestCase):
 
     def test_access_add_post(self):
         test_data = {
-            "url": reverse('add_post'),
+            "url": reverse("add_post"),
             "none_user_status_code": 302,
             "user_status_code": 403,
             "author_status_code": 200,
@@ -149,7 +152,7 @@ class TestBlog(CreateTestUsersAndPostsMixin, AccessMixin, TestCase):
 
     def test_access_edit_draft(self):
         test_data = {
-            "url": reverse('edit_draft', kwargs={"post_slug": "draft-post"}),
+            "url": reverse("edit_draft", kwargs={"post_slug": "draft-post"}),
             "none_user_status_code": 302,
             "user_status_code": 403,
             "author_status_code": 200,
@@ -161,7 +164,7 @@ class TestBlog(CreateTestUsersAndPostsMixin, AccessMixin, TestCase):
 
     def test_edit_unpublished_post(self):
         test_data = {
-            "url": reverse('edit_unpublished_post', kwargs={"post_slug": "unpublished-post"}),
+            "url": reverse("edit_unpublished_post", kwargs={"post_slug": "unpublished-post"}),
             "none_user_status_code": 302,
             "user_status_code": 403,
             "author_status_code": 403,
@@ -310,7 +313,7 @@ class TestEditDraftPostView(CreateTestUsersAndPostsMixin, AccessMixin, TestCase)
             "admin_status_code": 404,
         }
         self.access_test_with_all_users(**test_data)
-    
+
     def test_published_post_in_edit_draft_view(self):
         """
         Test view with a published post.
@@ -577,7 +580,7 @@ class TestEditUnpublishedPostViews(CreateTestUsersAndPostsMixin, AccessMixin, Te
             "admin_status_code": 404,
         }
         self.access_test_with_all_users(**test_data)
-    
+
     def test_edit_unpublished_post_view(self):
         """
         Test editing an unpublished post.
@@ -804,19 +807,20 @@ class TestSubscriptionsView(CreateTestUsersAndPostsMixin, TestCase):
     """
     Test SubscriptionsView
     """
+
     def test_queryset(self):
         """
         Test only published posts in quetyset
         """
         request_factory = RequestFactory()
         request = request_factory.get(reverse("subscriptions"))
-        request.user = CustomUser.objects.get(username='user')
+        request.user = CustomUser.objects.get(username="user")
 
         middleware = SessionMiddleware(lambda request: None)
         middleware.process_request(request)
         request.session.save()
 
-        request.session['subscriptions'] = ['author']
+        request.session["subscriptions"] = ["author"]
         request.session.save()
 
         view = SubscriptionsView()
@@ -830,32 +834,33 @@ class TestSubscriptionsView(CreateTestUsersAndPostsMixin, TestCase):
         """
         Test page before and after subscribe
         """
-        user = CustomUser.objects.get(username='user')
-        author = CustomUser.objects.get(username='author')
+        user = CustomUser.objects.get(username="user")
+        author = CustomUser.objects.get(username="author")
         self.client.force_login(user)
-        
-        response = self.client.get(reverse('subscriptions'))
+
+        response = self.client.get(reverse("subscriptions"))
         self.assertEqual(response.status_code, 200)
         self.assertIn("Вы еще ни на кого не подписаны", response.content.decode("utf-8"))
 
         self.client.get(reverse("users:subscribe", kwargs={"author_username": author.username}))
 
-        response = self.client.get(reverse('subscriptions'))
+        response = self.client.get(reverse("subscriptions"))
         self.assertEqual(response.status_code, 200)
         for post in author.author_posts.filter(is_published=True)[:5]:
-            self.assertIn(post.title, response.content.decode('utf-8'))
+            self.assertIn(post.title, response.content.decode("utf-8"))
 
 
 class TestFeedback(TestCase):
     """
     Test Feedback
     """
+
     def setUp(self):
         """
         Setup request_factory
         """
         self.request_factory = RequestFactory()
-    
+
     def test_feedback_form(self):
         """
         Test the feedback form
@@ -878,7 +883,7 @@ class TestFeedback(TestCase):
         send_feedback(data)
         self.assertEqual(len(mail.outbox), 1)
         email = mail.outbox[0]
-        self.assertEqual(email.from_email, data['email'])
+        self.assertEqual(email.from_email, data["email"])
         self.assertEqual(email.to, [settings.ADMINS[0][1]])
         self.assertEqual(email.subject, f'{data["name"]} отправил вам письмо через форму обратной связи')
         self.assertIn(f'От {data["name"]}({data["email"]})', email.body)
@@ -894,10 +899,22 @@ class TestFeedback(TestCase):
         response = contact(request)
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn('<input type="text" name="name" id="name" class="form-control" placeholder="Name" required>', response.content.decode("utf-8"))
-        self.assertIn('<input type="text" name="email" id="email" class="form-control" placeholder="Email" maxlength="320" required>', response.content.decode("utf-8"))
-        self.assertIn('<input type="text" name="subject" id="subject" class="form-control" placeholder="Subject" required>', response.content.decode("utf-8"))
-        self.assertIn('<textarea name="message" cols="40" rows="5" id="message" class="form-control" placeholder="Message" required>\n</textarea>', response.content.decode("utf-8"))
+        self.assertIn(
+            '<input type="text" name="name" id="name" class="form-control" placeholder="Name" required>',
+            response.content.decode("utf-8"),
+        )
+        self.assertIn(
+            '<input type="text" name="email" id="email" class="form-control" placeholder="Email" maxlength="320" required>',
+            response.content.decode("utf-8"),
+        )
+        self.assertIn(
+            '<input type="text" name="subject" id="subject" class="form-control" placeholder="Subject" required>',
+            response.content.decode("utf-8"),
+        )
+        self.assertIn(
+            '<textarea name="message" cols="40" rows="5" id="message" class="form-control" placeholder="Message" required>\n</textarea>',
+            response.content.decode("utf-8"),
+        )
 
     def test_feedback_function_with_invalid_data(self):
         """
@@ -910,7 +927,7 @@ class TestFeedback(TestCase):
         response = contact(request)
         self.assertEqual(response.status_code, 200)
         self.assertIn("Введите правильный адрес электронной почты.", response.content.decode("utf-8"))
-        
+
     def test_feedback_function_with_valid_data(self):
         """
         Test the feedback view function with valid data
@@ -924,7 +941,9 @@ class TestFeedback(TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.template_name, "blog/feedback_done.html")
             mock_send_feedback_task.assert_called_once()
-            mock_send_feedback_task.assert_called_once_with({"name": "user", "email": "user@mail.com", "subject": "Test subject", "message": "Test message"})
+            mock_send_feedback_task.assert_called_once_with(
+                {"name": "user", "email": "user@mail.com", "subject": "Test subject", "message": "Test message"}
+            )
 
     def test_feedback_view_get_method(self):
         """
@@ -961,6 +980,101 @@ class TestFeedback(TestCase):
         self.assertIn("Сообщение отправлено", response.content.decode("utf-8"))
 
 
+class TestSearch(CreateTestUsersAndPostsMixin, TestCase):
+    """
+    Test search
+    """
 
+    def test_serach_form(self):
+        """
+        Test search form
+        """
+        form_data = {"text": ""}
+        form = SearchForm(form_data)
+        self.assertFalse(form.is_valid())
 
-    
+        form_data = {"text": "a"}
+        form = SearchForm(form_data)
+        self.assertFalse(form.is_valid())
+
+        form_data = {"text": "ab"}
+        form = SearchForm(form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_search_view_get(self):
+        """
+        Test search view GET method
+        """
+        response = self.client.get(reverse("search"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "blog/search.html")
+
+        post_data = {"text": ""}
+        response = self.client.get(reverse("search"), data=post_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "blog/search.html")
+        self.assertIn("Нет результатов", response.content.decode())
+
+        post_data = {"text": "a"}
+        response = self.client.get(reverse("search"), data=post_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "blog/search.html")
+        self.assertIn("Нет результатов", response.content.decode())
+
+        post_data = {"text": "test"}
+        response = self.client.get(reverse("search"), data=post_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "blog/search.html")
+        self.assertIn("Нет результатов", response.content.decode())
+
+        post_data = {"text": "published_post"}
+        response = self.client.get(reverse("search"), data=post_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "blog/search.html")
+        self.assertIn("published_post", response.content.decode())
+
+        post_data = {"text": "published"}
+        response = self.client.get(reverse("search"), data=post_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "blog/search.html")
+        self.assertIn("published_post", response.content.decode())
+
+        post_data = {"text": "post"}
+        response = self.client.get(reverse("search"), data=post_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "blog/search.html")
+        self.assertIn("published_post", response.content.decode())
+
+        post_data = {"text": "draft"}
+        response = self.client.get(reverse("search"), data=post_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "blog/search.html")
+        self.assertNotIn("published_post", response.content.decode())
+
+        post_data = {"text": "draft"}
+        response = self.client.get(reverse("search"), data=post_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "blog/search.html")
+        self.assertIn("Нет результатов", response.content.decode())
+
+        post_data = {"text": "unpublished"}
+        response = self.client.get(reverse("search"), data=post_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "blog/search.html")
+        self.assertIn("Нет результатов", response.content.decode())
+
+        author = CustomUser.objects.get(username="author")
+        Post.objects.create(title="test_post", is_draft=False, is_published=True, author=author)
+        post_data = {"text": "test_post"}
+        response = self.client.get(reverse("search"), data=post_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "blog/search.html")
+        self.assertNotIn("published_post", response.content.decode())
+        self.assertIn("test_post", response.content.decode())
+
+        post_data = {"text": "post"}
+        response = self.client.get(reverse("search"), data=post_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "blog/search.html")
+        self.assertIn("published_post", response.content.decode())
+        self.assertIn("test_post", response.content.decode())

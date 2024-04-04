@@ -126,3 +126,11 @@ class FeedbackForm(forms.Form):
         required=True,
         widget=forms.Textarea(attrs={"id": "message", "class": "form-control", "rows": 5, "placeholder": "Message"}),
     )
+
+
+class SearchForm(forms.Form):
+    text = forms.CharField(
+        required=True,
+        min_length=2,
+        widget=forms.TextInput(attrs={"type": "text", "class": "form-control", "placeholder": "Search..."}),
+    )

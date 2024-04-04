@@ -1,0 +1,66 @@
+{% extends "blog/base.html" %}
+
+{% load blog_tags %}
+
+{% load users_tags %}
+
+{% block title %}
+{% endblock title %}
+
+{% block content %}
+    <!-- Blog Section -->
+    <section id="blog">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-offset-1 col-md-10 col-sm-12">
+                    <form method="get">
+                        <div class="input-group">
+                            {% for field in form %}{{ field }}{% endfor %}
+                            <span class="input-group-btn">
+                                <input type="submit"
+                                       class="btn btn-default"
+                                       name="search-button"
+                                       value="Поиск" />
+                            </span>
+                        </div>
+                    </form>
+                    {% if posts %}
+                        {% for post in posts %}
+                            <div class="blog-post-thumb">
+                                {% if post.image %}
+                                    <div class="blog-post-image">
+                                        <a href="{{ post.get_absolute_url }}">
+                                            <img src="{{ post.image.url }}" class="img-responsive" alt="Blog Image" />
+                                        </a>
+                                    </div>
+                                {% endif %}
+                                <div class="blog-post-title">
+                                    <h3>
+                                        <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+                                    </h3>
+                                </div>
+                                <div class="blog-post-format">
+                                    {% author_info post.author %}
+                                    <span><i class="fa fa-date"></i>{{ post.time_update }}</span>
+                                    <!-- <span><a href="#"><i class="fa fa-comment-o"></i> 35 Comments</a></span> -->
+                                    <span><i class="fa"></i>Просмотров: {{ post.get_views }}</span>
+                                </div>
+                                <div class="blog-post-des">
+                                    <p>{{ post.article|safe|truncatewords:100 }}</p>
+                                    <a href="{{ post.get_absolute_url }}" class="btn btn-default">Читать</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="d-flex justify-content-center align-items-center"
+                             style="margin: 20% 0% 25% 0%">
+                            <h3 class="text-center">Нет результатов</h3>
+                        </div>
+                    {% endif %}
+                    <!-- Блок пагинации -->
+                    {% pagination paginator page_obj %}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock content %}

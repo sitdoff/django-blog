@@ -8,6 +8,7 @@ urlpatterns = [
     path("about", views.about, name="about"),
     path("gallery", views.gallery, name="gallery"),
     path("contact", views.contact, name="contact"),
+    path("search", views.search, name="search"),
     path("add", views.AddPost.as_view(), name="add_post"),
     path("post/<slug:post_slug>", views.PostDetailView.as_view(), name="post"),
     path("drafts", views.DraftPostsView.as_view(), name="drafts"),
